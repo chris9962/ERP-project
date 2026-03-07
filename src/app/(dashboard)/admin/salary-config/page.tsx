@@ -70,12 +70,12 @@ export default function SalaryConfigPage() {
     const multiplier = parseFloat(formMultiplier);
 
     if (isNaN(rate) || rate <= 0) {
-      setFormError("Luong ngay khong hop le");
+      setFormError("Lương ngày không hợp lệ");
       setFormLoading(false);
       return;
     }
     if (isNaN(multiplier) || multiplier <= 0) {
-      setFormError("He so tang ca khong hop le");
+      setFormError("Hệ số tăng ca không hợp lệ");
       setFormLoading(false);
       return;
     }
@@ -92,7 +92,7 @@ export default function SalaryConfigPage() {
     });
     if (!res.ok) {
       const data = await res.json();
-      setFormError("Loi: " + (data.error ?? res.statusText));
+      setFormError("Lỗi: " + (data.error ?? res.statusText));
       setFormLoading(false);
       return;
     }
@@ -110,18 +110,18 @@ export default function SalaryConfigPage() {
   }
 
   const typeLabels: Record<string, string> = {
-    full_time: "Toan thoi gian",
-    part_time: "Ban thoi gian",
+    full_time: "Toàn thời gian",
+    part_time: "Bán thời gian",
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Cau hinh luong
+          Cấu hình lương
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Cau hinh muc luong mac dinh theo loai nhan vien
+          Cấu hình mức lương mặc định theo loại nhân viên
         </p>
       </div>
 
@@ -129,10 +129,10 @@ export default function SalaryConfigPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Loai nhan vien</TableHead>
-              <TableHead>Luong ngay mac dinh</TableHead>
-              <TableHead>He so tang ca</TableHead>
-              <TableHead>Cap nhat</TableHead>
+              <TableHead>Loại nhân viên</TableHead>
+              <TableHead>Lương ngày mặc định</TableHead>
+              <TableHead>Hệ số tăng ca</TableHead>
+              <TableHead>Cập nhật</TableHead>
               <TableHead className="w-[60px]" />
             </TableRow>
           </TableHeader>
@@ -140,13 +140,13 @@ export default function SalaryConfigPage() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
-                  Dang tai...
+                  Đang tải...
                 </TableCell>
               </TableRow>
             ) : configs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
-                  Chua co cau hinh nao
+                  Chưa có cấu hình nào
                 </TableCell>
               </TableRow>
             ) : (
@@ -184,7 +184,7 @@ export default function SalaryConfigPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Chinh sua cau hinh -{" "}
+              Chỉnh sửa cấu hình -{" "}
               {editing
                 ? typeLabels[editing.employment_type] || editing.employment_type
                 : ""}
@@ -192,7 +192,7 @@ export default function SalaryConfigPage() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label>Luong ngay mac dinh (VND)</Label>
+              <Label>Lương ngày mặc định (VND)</Label>
               <Input
                 type="number"
                 value={formRate}
@@ -203,7 +203,7 @@ export default function SalaryConfigPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>He so tang ca</Label>
+              <Label>Hệ số tăng ca</Label>
               <Input
                 type="number"
                 value={formMultiplier}
@@ -222,10 +222,10 @@ export default function SalaryConfigPage() {
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
               >
-                Huy
+                Hủy
               </Button>
               <Button type="submit" disabled={formLoading}>
-                {formLoading ? "Dang xu ly..." : "Cap nhat"}
+                {formLoading ? "Đang xử lý..." : "Cập nhật"}
               </Button>
             </div>
           </form>

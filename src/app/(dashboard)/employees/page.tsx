@@ -70,14 +70,14 @@ export default function EmployeesPage() {
   };
 
   const statusLabels: Record<string, string> = {
-    active: "Dang lam",
-    inactive: "Tam nghi",
-    resigned: "Da nghi",
+    active: "Đang làm",
+    inactive: "Tạm nghỉ",
+    resigned: "Đã nghỉ",
   };
 
   const typeLabels: Record<string, string> = {
-    full_time: "Toan thoi gian",
-    part_time: "Ban thoi gian",
+    full_time: "Toàn thời gian",
+    part_time: "Bán thời gian",
   };
 
   const filtered = employees.filter((emp) => {
@@ -98,15 +98,15 @@ export default function EmployeesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Nhan vien</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Nhân viên</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Quan ly danh sach nhan vien
+            Quản lý danh sách nhân viên
           </p>
         </div>
         <Link href="/employees/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Them nhan vien
+            Thêm nhân viên
           </Button>
         </Link>
       </div>
@@ -116,7 +116,7 @@ export default function EmployeesPage() {
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <Input
-            placeholder="Tim kiem ten, ma NV..."
+            placeholder="Tìm kiếm tên, mã NV..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -124,10 +124,10 @@ export default function EmployeesPage() {
         </div>
         <Select value={filterDept} onValueChange={setFilterDept}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Phong ban" />
+            <SelectValue placeholder="Phòng ban" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tat ca phong ban</SelectItem>
+            <SelectItem value="all">Tất cả phòng ban</SelectItem>
             {departments.map((d) => (
               <SelectItem key={d.id} value={d.name}>
                 {d.name}
@@ -137,13 +137,13 @@ export default function EmployeesPage() {
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Trang thai" />
+            <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tat ca</SelectItem>
-            <SelectItem value="active">Dang lam</SelectItem>
-            <SelectItem value="inactive">Tam nghi</SelectItem>
-            <SelectItem value="resigned">Da nghi</SelectItem>
+            <SelectItem value="all">Tất cả</SelectItem>
+            <SelectItem value="active">Đang làm</SelectItem>
+            <SelectItem value="inactive">Tạm nghỉ</SelectItem>
+            <SelectItem value="resigned">Đã nghỉ</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -154,11 +154,11 @@ export default function EmployeesPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Ma NV</TableHead>
-              <TableHead>Ho ten</TableHead>
-              <TableHead>Phong ban</TableHead>
-              <TableHead>Loai</TableHead>
-              <TableHead>Trang thai</TableHead>
-              <TableHead>Ngay vao lam</TableHead>
+              <TableHead>Họ tên</TableHead>
+              <TableHead>Phòng ban</TableHead>
+              <TableHead>Loại</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Ngày vào làm</TableHead>
               <TableHead className="w-[60px]" />
             </TableRow>
           </TableHeader>
@@ -166,13 +166,13 @@ export default function EmployeesPage() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={7} className="py-8 text-center text-neutral-400">
-                  Dang tai...
+                  Đang tải...
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="py-8 text-center text-neutral-400">
-                  Khong co nhan vien nao
+                  Không có nhân viên nào
                 </TableCell>
               </TableRow>
             ) : (

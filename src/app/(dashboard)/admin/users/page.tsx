@@ -122,7 +122,7 @@ export default function AdminUsersPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        setFormError("Loi khi cap nhat: " + (data.error ?? res.statusText));
+        setFormError("Lỗi khi cập nhật: " + (data.error ?? res.statusText));
         setFormLoading(false);
         return;
       }
@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setFormError(data.error || "Loi khi tao user");
+        setFormError(data.error || "Lỗi khi tạo user");
         setFormLoading(false);
         return;
       }
@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
   }
 
   async function deleteUser(user: UserProfile) {
-    if (!confirm(`Xoa user "${user.full_name || user.email}"?`)) return;
+    if (!confirm(`Xóa user "${user.full_name || user.email}"?`)) return;
 
     await fetch("/api/admin/delete-user", {
       method: "POST",
@@ -190,23 +190,23 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Quan ly User
+            Quản lý User
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Quan ly tai khoan trong he thong
+            Quản lý tài khoản trong hệ thống
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />
-              Them user
+              Thêm user
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingUser ? "Chinh sua user" : "Them user moi"}
+                {editingUser ? "Chỉnh sửa user" : "Thêm user mới"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -222,7 +222,7 @@ export default function AdminUsersPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Mat khau</Label>
+                    <Label>Mật khẩu</Label>
                     <Input
                       type="password"
                       value={formPassword}
@@ -234,14 +234,14 @@ export default function AdminUsersPage() {
                 </>
               )}
               <div className="space-y-2">
-                <Label>Ho va ten</Label>
+                <Label>Họ và tên</Label>
                 <Input
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label>So dien thoai</Label>
+                <Label>Số điện thoại</Label>
                 <Input
                   value={formPhone}
                   onChange={(e) => setFormPhone(e.target.value)}
@@ -251,7 +251,7 @@ export default function AdminUsersPage() {
                 <Label>Role</Label>
                 <Select value={formRoleId} onValueChange={setFormRoleId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Chon role" />
+                    <SelectValue placeholder="Chọn role" />
                   </SelectTrigger>
                   <SelectContent>
                     {roles.map((r) => (
@@ -271,14 +271,14 @@ export default function AdminUsersPage() {
                   variant="outline"
                   onClick={() => setDialogOpen(false)}
                 >
-                  Huy
+                  Hủy
                 </Button>
                 <Button type="submit" disabled={formLoading}>
                   {formLoading
-                    ? "Dang xu ly..."
+                    ? "Đang xử lý..."
                     : editingUser
-                      ? "Cap nhat"
-                      : "Tao user"}
+                      ? "Cập nhật"
+                      : "Tạo user"}
                 </Button>
               </div>
             </form>
@@ -290,7 +290,7 @@ export default function AdminUsersPage() {
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
         <Input
-          placeholder="Tim kiem user..."
+          placeholder="Tìm kiếm user..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"
@@ -302,10 +302,10 @@ export default function AdminUsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ho ten</TableHead>
+              <TableHead>Họ tên</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Trang thai</TableHead>
+              <TableHead>Trạng thái</TableHead>
               <TableHead className="w-[100px]" />
             </TableRow>
           </TableHeader>
@@ -313,13 +313,13 @@ export default function AdminUsersPage() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
-                  Dang tai...
+                  Đang tải...
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
-                  Khong co user nao
+                  Không có user nào
                 </TableCell>
               </TableRow>
             ) : (

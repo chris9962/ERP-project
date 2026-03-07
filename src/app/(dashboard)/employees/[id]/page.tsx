@@ -136,22 +136,22 @@ export default function EmployeeDetailPage() {
   };
 
   const statusLabels: Record<string, string> = {
-    active: "Dang lam",
-    inactive: "Tam nghi",
-    resigned: "Da nghi",
+    active: "Đang làm",
+    inactive: "Tạm nghỉ",
+    resigned: "Đã nghỉ",
   };
 
   const valueLabels: Record<number, string> = {
-    0: "Vang",
-    0.5: "Nua ngay",
-    1: "Du ngay",
-    1.5: "Tang ca",
+    0: "Vắng",
+    0.5: "Nửa ngày",
+    1: "Đủ ngày",
+    1.5: "Tăng ca",
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-neutral-400">
-        Dang tai...
+        Đang tải...
       </div>
     );
   }
@@ -159,7 +159,7 @@ export default function EmployeeDetailPage() {
   if (!employee) {
     return (
       <div className="flex items-center justify-center py-20 text-neutral-400">
-        Khong tim thay nhan vien
+        Không tìm thấy nhân viên
       </div>
     );
   }
@@ -179,7 +179,7 @@ export default function EmployeeDetailPage() {
             </h1>
             <div className="mt-1 flex items-center gap-2">
               <span className="text-sm text-neutral-500">
-                {employee.employee_code || "Chua co ma NV"}
+                {employee.employee_code || "Chưa có mã NV"}
               </span>
               <Badge
                 variant="outline"
@@ -194,21 +194,21 @@ export default function EmployeeDetailPage() {
           <Link href={`/employees/${id}/salary`}>
             <Button variant="outline">
               <DollarSign className="mr-2 h-4 w-4" />
-              Quan ly luong
+              Quản lý lương
             </Button>
           </Link>
           {!editing ? (
             <Button onClick={() => setEditing(true)}>
               <Pencil className="mr-2 h-4 w-4" />
-              Chinh sua
+              Chỉnh sửa
             </Button>
           ) : (
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setEditing(false)}>
-                Huy
+                Hủy
               </Button>
               <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Dang luu..." : "Luu"}
+                {saving ? "Đang lưu..." : "Lưu"}
               </Button>
             </div>
           )}
@@ -217,9 +217,9 @@ export default function EmployeeDetailPage() {
 
       <Tabs defaultValue="info">
         <TabsList>
-          <TabsTrigger value="info">Thong tin</TabsTrigger>
-          <TabsTrigger value="salary">Lich su luong</TabsTrigger>
-          <TabsTrigger value="attendance">Diem danh</TabsTrigger>
+          <TabsTrigger value="info">Thông tin</TabsTrigger>
+          <TabsTrigger value="salary">Lịch sử lương</TabsTrigger>
+          <TabsTrigger value="attendance">Điểm danh</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info" className="mt-4">
@@ -227,7 +227,7 @@ export default function EmployeeDetailPage() {
             <CardContent className="pt-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Ho va ten</Label>
+                  <Label>Họ và tên</Label>
                   {editing ? (
                     <Input
                       value={formName}
@@ -238,7 +238,7 @@ export default function EmployeeDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Ma nhan vien</Label>
+                  <Label>Mã nhân viên</Label>
                   {editing ? (
                     <Input
                       value={formCode}
@@ -251,7 +251,7 @@ export default function EmployeeDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>So CCCD</Label>
+                  <Label>Số CCCD</Label>
                   {editing ? (
                     <Input
                       value={formCccd}
@@ -262,11 +262,11 @@ export default function EmployeeDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Phong ban</Label>
+                  <Label>Phòng ban</Label>
                   {editing ? (
                     <Select value={formDeptId} onValueChange={setFormDeptId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chon phong ban" />
+                        <SelectValue placeholder="Chọn phòng ban" />
                       </SelectTrigger>
                       <SelectContent>
                         {departments.map((d) => (
@@ -284,7 +284,7 @@ export default function EmployeeDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Loai nhan vien</Label>
+                  <Label>Loại nhân viên</Label>
                   {editing ? (
                     <Select value={formType} onValueChange={setFormType}>
                       <SelectTrigger>
@@ -292,32 +292,32 @@ export default function EmployeeDetailPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="full_time">
-                          Toan thoi gian
+                          Toàn thời gian
                         </SelectItem>
                         <SelectItem value="part_time">
-                          Ban thoi gian
+                          Bán thời gian
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   ) : (
                     <p className="text-sm">
                       {employee.employment_type === "full_time"
-                        ? "Toan thoi gian"
-                        : "Ban thoi gian"}
+                        ? "Toàn thời gian"
+                        : "Bán thời gian"}
                     </p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Trang thai</Label>
+                  <Label>Trạng thái</Label>
                   {editing ? (
                     <Select value={formStatus} onValueChange={setFormStatus}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">Dang lam</SelectItem>
-                        <SelectItem value="inactive">Tam nghi</SelectItem>
-                        <SelectItem value="resigned">Da nghi</SelectItem>
+                        <SelectItem value="active">Đang làm</SelectItem>
+                        <SelectItem value="inactive">Tạm nghỉ</SelectItem>
+                        <SelectItem value="resigned">Đã nghỉ</SelectItem>
                       </SelectContent>
                     </Select>
                   ) : (
@@ -330,7 +330,7 @@ export default function EmployeeDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Ngay vao lam</Label>
+                  <Label>Ngày vào làm</Label>
                   <p className="text-sm">
                     {employee.start_date
                       ? new Date(employee.start_date).toLocaleDateString(
@@ -353,26 +353,26 @@ export default function EmployeeDetailPage() {
         <TabsContent value="salary" className="mt-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Lich su luong</CardTitle>
+              <CardTitle className="text-base">Lịch sử lương</CardTitle>
               <Link href={`/employees/${id}/salary`}>
                 <Button size="sm" variant="outline">
-                  Cap nhat luong
+                  Cập nhật lương
                 </Button>
               </Link>
             </CardHeader>
             <CardContent>
               {salaryHistory.length === 0 ? (
                 <p className="py-4 text-center text-sm text-neutral-400">
-                  Chua co lich su luong
+                  Chưa có lịch sử lương
                 </p>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Muc luong</TableHead>
-                      <TableHead>Tu ngay</TableHead>
-                      <TableHead>Den ngay</TableHead>
-                      <TableHead>Ly do</TableHead>
+                      <TableHead>Mức lương</TableHead>
+                      <TableHead>Từ ngày</TableHead>
+                      <TableHead>Đến ngày</TableHead>
+                      <TableHead>Lý do</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -389,7 +389,7 @@ export default function EmployeeDetailPage() {
                         <TableCell>
                           {s.end_date
                             ? new Date(s.end_date).toLocaleDateString("vi-VN")
-                            : "Hien tai"}
+                            : "Hiện tại"}
                         </TableCell>
                         <TableCell className="text-neutral-500">
                           {s.reason || "—"}
@@ -407,21 +407,21 @@ export default function EmployeeDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                Lich su diem danh (30 ngay gan nhat)
+                Lịch sử điểm danh (30 ngày gần nhất)
               </CardTitle>
             </CardHeader>
             <CardContent>
               {attendance.length === 0 ? (
                 <p className="py-4 text-center text-sm text-neutral-400">
-                  Chua co du lieu diem danh
+                  Chưa có dữ liệu điểm danh
                 </p>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Ngay</TableHead>
-                      <TableHead>Gia tri</TableHead>
-                      <TableHead>Ghi chu</TableHead>
+                      <TableHead>Ngày</TableHead>
+                      <TableHead>Giá trị</TableHead>
+                      <TableHead>Ghi chú</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

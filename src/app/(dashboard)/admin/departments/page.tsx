@@ -74,7 +74,7 @@ export default function AdminDepartmentsPage() {
     setFormLoading(true);
 
     if (!formName.trim()) {
-      setFormError("Ten phong ban khong duoc de trong");
+      setFormError("Tên phòng ban không được để trống");
       setFormLoading(false);
       return;
     }
@@ -88,7 +88,7 @@ export default function AdminDepartmentsPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        setFormError("Loi: " + (data.error ?? res.statusText));
+        setFormError("Lỗi: " + (data.error ?? res.statusText));
         setFormLoading(false);
         return;
       }
@@ -101,7 +101,7 @@ export default function AdminDepartmentsPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        setFormError("Loi: " + (data.error ?? res.statusText));
+        setFormError("Lỗi: " + (data.error ?? res.statusText));
         setFormLoading(false);
         return;
       }
@@ -113,7 +113,7 @@ export default function AdminDepartmentsPage() {
   }
 
   async function deleteDept(dept: Department) {
-    if (!confirm(`Xoa phong ban "${dept.name}"?`)) return;
+    if (!confirm(`Xóa phòng ban "${dept.name}"?`)) return;
     await fetch(`/api/departments/${dept.id}`, {
       method: "DELETE",
       credentials: "include",
@@ -125,40 +125,40 @@ export default function AdminDepartmentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Phong ban</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Phòng ban</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Quan ly danh sach phong ban
+            Quản lý danh sách phòng ban
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />
-              Them phong ban
+              Thêm phòng ban
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editing ? "Chinh sua phong ban" : "Them phong ban moi"}
+                {editing ? "Chỉnh sửa phòng ban" : "Thêm phòng ban mới"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Ten phong ban</Label>
+                <Label>Tên phòng ban</Label>
                 <Input
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Nhap ten phong ban"
+                  placeholder="Nhập tên phòng ban"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label>Mo ta</Label>
+                <Label>Mô tả</Label>
                 <Textarea
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  placeholder="Mo ta phong ban"
+                  placeholder="Mô tả phòng ban"
                   rows={3}
                 />
               </div>
@@ -171,10 +171,10 @@ export default function AdminDepartmentsPage() {
                   variant="outline"
                   onClick={() => setDialogOpen(false)}
                 >
-                  Huy
+                  Hủy
                 </Button>
                 <Button type="submit" disabled={formLoading}>
-                  {formLoading ? "Dang xu ly..." : editing ? "Cap nhat" : "Tao"}
+                  {formLoading ? "Đang xử lý..." : editing ? "Cập nhật" : "Tạo"}
                 </Button>
               </div>
             </form>
@@ -186,9 +186,9 @@ export default function AdminDepartmentsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ten phong ban</TableHead>
-              <TableHead>Mo ta</TableHead>
-              <TableHead>Ngay tao</TableHead>
+              <TableHead>Tên phòng ban</TableHead>
+              <TableHead>Mô tả</TableHead>
+              <TableHead>Ngày tạo</TableHead>
               <TableHead className="w-[100px]" />
             </TableRow>
           </TableHeader>
@@ -196,13 +196,13 @@ export default function AdminDepartmentsPage() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={4} className="py-8 text-center text-neutral-400">
-                  Dang tai...
+                  Đang tải...
                 </TableCell>
               </TableRow>
             ) : departments.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="py-8 text-center text-neutral-400">
-                  Chua co phong ban nao
+                  Chưa có phòng ban nào
                 </TableCell>
               </TableRow>
             ) : (

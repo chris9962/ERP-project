@@ -92,12 +92,12 @@ export default function SalaryReportPage() {
 
   function exportCSV() {
     const headers = [
-      "Ma NV",
-      "Ho ten",
-      "Phong ban",
-      "Luong co ban",
-      "Ngay cong",
-      "Tong luong",
+      "Mã NV",
+      "Họ tên",
+      "Phòng ban",
+      "Lương cơ bản",
+      "Ngày công",
+      "Tổng lương",
     ];
     const csvRows = [
       headers.join(","),
@@ -132,22 +132,22 @@ export default function SalaryReportPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Bao cao luong
+            Báo cáo lương
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Thong ke luong nhan vien theo ky
+            Thống kê lương nhân viên theo kỳ
           </p>
         </div>
         <Button variant="outline" onClick={exportCSV} disabled={rows.length === 0}>
           <Download className="mr-2 h-4 w-4" />
-          Xuat CSV
+          Xuất CSV
         </Button>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-neutral-500">Tu ngay</label>
+          <label className="text-xs font-medium text-neutral-500">Từ ngày</label>
           <Input
             type="date"
             value={fromDate}
@@ -156,7 +156,7 @@ export default function SalaryReportPage() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-neutral-500">Den ngay</label>
+          <label className="text-xs font-medium text-neutral-500">Đến ngày</label>
           <Input
             type="date"
             value={toDate}
@@ -166,14 +166,14 @@ export default function SalaryReportPage() {
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-neutral-500">
-            Phong ban
+            Phòng ban
           </label>
           <Select value={filterDept} onValueChange={setFilterDept}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Tat ca" />
+              <SelectValue placeholder="Tất cả" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tat ca phong ban</SelectItem>
+              <SelectItem value="all">Tất cả phòng ban</SelectItem>
               {departments.map((d) => (
                 <SelectItem key={d.id} value={d.id}>
                   {d.name}
@@ -183,7 +183,7 @@ export default function SalaryReportPage() {
           </Select>
         </div>
         <Button onClick={fetchReport} disabled={loading}>
-          {loading ? "Dang tai..." : "Xem bao cao"}
+          {loading ? "Đang tải..." : "Xem báo cáo"}
         </Button>
       </div>
 
@@ -192,7 +192,7 @@ export default function SalaryReportPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
-              Tong chi phi luong
+              Tổng chi phí lương
             </CardTitle>
             <DollarSign className="h-4 w-4 text-neutral-400" />
           </CardHeader>
@@ -205,7 +205,7 @@ export default function SalaryReportPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
-              So nhan vien
+              Số nhân viên
             </CardTitle>
             <Users className="h-4 w-4 text-neutral-400" />
           </CardHeader>
@@ -216,7 +216,7 @@ export default function SalaryReportPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
-              Ngay cong TB
+              Ngày công TB
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-neutral-400" />
           </CardHeader>
@@ -231,25 +231,25 @@ export default function SalaryReportPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ma NV</TableHead>
-              <TableHead>Ho ten</TableHead>
-              <TableHead>Phong ban</TableHead>
-              <TableHead className="text-right">Luong co ban</TableHead>
-              <TableHead className="text-right">Ngay cong</TableHead>
-              <TableHead className="text-right">Tong luong</TableHead>
+              <TableHead>Mã NV</TableHead>
+              <TableHead>Họ tên</TableHead>
+              <TableHead>Phòng ban</TableHead>
+              <TableHead className="text-right">Lương cơ bản</TableHead>
+              <TableHead className="text-right">Ngày công</TableHead>
+              <TableHead className="text-right">Tổng lương</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
                 <TableCell colSpan={6} className="py-8 text-center text-neutral-400">
-                  Dang tai...
+                  Đang tải...
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="py-8 text-center text-neutral-400">
-                  Khong co du lieu. Nhan &quot;Xem bao cao&quot; de tai.
+                  Không có dữ liệu. Nhấn &quot;Xem báo cáo&quot; để tải.
                 </TableCell>
               </TableRow>
             ) : (
@@ -275,7 +275,7 @@ export default function SalaryReportPage() {
                   </TableRow>
                 ))}
                 <TableRow className="bg-neutral-50 font-medium">
-                  <TableCell colSpan={4}>Tong cong</TableCell>
+                  <TableCell colSpan={4}>Tổng cộng</TableCell>
                   <TableCell className="text-right">
                     {rows.reduce((s, r) => s + r.total_days, 0)}
                   </TableCell>

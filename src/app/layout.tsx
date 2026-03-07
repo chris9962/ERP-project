@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ERP System - Quan ly Doanh nghiep",
-  description: "He thong quan ly nhan su va cham cong",
+  title: "ERP System - Quản lý Doanh nghiệp",
+  description: "Hệ thống quản lý nhân sự và chấm công",
 };
 
 export default function RootLayout({

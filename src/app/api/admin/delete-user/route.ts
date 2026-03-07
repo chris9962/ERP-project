@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   const { userId } = await request.json();
   if (!userId) {
     return NextResponse.json(
-      { error: "userId la bat buoc" },
+      { error: "userId là bắt buộc" },
       { status: 400 },
     );
   }
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   // Prevent self-delete
   if (userId === user.id) {
     return NextResponse.json(
-      { error: "Khong the xoa chinh minh" },
+      { error: "Không thể xóa chính mình" },
       { status: 400 },
     );
   }

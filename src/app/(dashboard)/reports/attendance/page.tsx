@@ -109,17 +109,17 @@ export default function AttendanceReportPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Bao cao diem danh
+          Báo cáo điểm danh
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Thong ke diem danh nhan vien theo ky
+          Thống kê điểm danh nhân viên theo kỳ
         </p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-neutral-500">Tu ngay</label>
+          <label className="text-xs font-medium text-neutral-500">Từ ngày</label>
           <Input
             type="date"
             value={fromDate}
@@ -128,7 +128,7 @@ export default function AttendanceReportPage() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-neutral-500">Den ngay</label>
+          <label className="text-xs font-medium text-neutral-500">Đến ngày</label>
           <Input
             type="date"
             value={toDate}
@@ -138,14 +138,14 @@ export default function AttendanceReportPage() {
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-neutral-500">
-            Phong ban
+            Phòng ban
           </label>
           <Select value={filterDept} onValueChange={setFilterDept}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Tat ca" />
+              <SelectValue placeholder="Tất cả" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tat ca phong ban</SelectItem>
+              <SelectItem value="all">Tất cả phòng ban</SelectItem>
               {departments.map((d) => (
                 <SelectItem key={d.id} value={d.id}>
                   {d.name}
@@ -155,7 +155,7 @@ export default function AttendanceReportPage() {
           </Select>
         </div>
         <Button onClick={fetchReport} disabled={loading}>
-          {loading ? "Dang tai..." : "Xem bao cao"}
+          {loading ? "Đang tải..." : "Xem báo cáo"}
         </Button>
       </div>
 
@@ -164,7 +164,7 @@ export default function AttendanceReportPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
-              Tong nhan vien
+              Tổng nhân viên
             </CardTitle>
             <Users className="h-4 w-4 text-neutral-400" />
           </CardHeader>
@@ -175,7 +175,7 @@ export default function AttendanceReportPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
-              Ngay cong TB
+              Ngày công TB
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-neutral-400" />
           </CardHeader>
@@ -186,7 +186,7 @@ export default function AttendanceReportPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
-              Ti le di lam
+              Tỉ lệ đi làm
             </CardTitle>
             <CalendarCheck className="h-4 w-4 text-neutral-400" />
           </CardHeader>
@@ -197,7 +197,7 @@ export default function AttendanceReportPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
-              Tong ngay vang
+              Tổng ngày vắng
             </CardTitle>
             <AlertTriangle className="h-4 w-4 text-neutral-400" />
           </CardHeader>
@@ -212,7 +212,7 @@ export default function AttendanceReportPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              Nhan vien vang nhieu nhat
+              Nhân viên vắng nhiều nhất
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -223,7 +223,7 @@ export default function AttendanceReportPage() {
                   variant="outline"
                   className="border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-700"
                 >
-                  {r.full_name} — {r.absent_days} ngay vang
+                  {r.full_name} — {r.absent_days} ngày vắng
                 </Badge>
               ))}
             </div>
@@ -236,27 +236,27 @@ export default function AttendanceReportPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ma NV</TableHead>
-              <TableHead>Ho ten</TableHead>
-              <TableHead>Phong ban</TableHead>
-              <TableHead className="text-right">Nua ngay</TableHead>
-              <TableHead className="text-right">Du ngay</TableHead>
-              <TableHead className="text-right">Tang ca</TableHead>
-              <TableHead className="text-right">Vang</TableHead>
-              <TableHead className="text-right">Tong cong</TableHead>
+              <TableHead>Mã NV</TableHead>
+              <TableHead>Họ tên</TableHead>
+              <TableHead>Phòng ban</TableHead>
+              <TableHead className="text-right">Nửa ngày</TableHead>
+              <TableHead className="text-right">Đủ ngày</TableHead>
+              <TableHead className="text-right">Tăng ca</TableHead>
+              <TableHead className="text-right">Vắng</TableHead>
+              <TableHead className="text-right">Tổng cộng</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
                 <TableCell colSpan={8} className="py-8 text-center text-neutral-400">
-                  Dang tai...
+                  Đang tải...
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="py-8 text-center text-neutral-400">
-                  Khong co du lieu. Nhan &quot;Xem bao cao&quot; de tai.
+                  Không có dữ liệu. Nhấn &quot;Xem báo cáo&quot; để tải.
                 </TableCell>
               </TableRow>
             ) : (

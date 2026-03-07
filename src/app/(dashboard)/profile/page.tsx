@@ -26,9 +26,9 @@ export default function ProfilePage() {
       credentials: "include",
     });
     if (!res.ok) {
-      setMessage("Loi khi cap nhat thong tin");
+      setMessage("Lỗi khi cập nhật thông tin");
     } else {
-      setMessage("Cap nhat thanh cong");
+      setMessage("Cập nhật thành công");
     }
     setSaving(false);
   }
@@ -36,15 +36,15 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Thong tin ca nhan</h1>
-        <p className="mt-1 text-sm text-neutral-500">Xem va cap nhat thong tin cua ban</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Thông tin cá nhân</h1>
+        <p className="mt-1 text-sm text-neutral-500">Xem và cập nhật thông tin của bạn</p>
       </div>
 
       <Card className="max-w-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Ho so</CardTitle>
+              <CardTitle>Hồ sơ</CardTitle>
               <CardDescription>{profile?.email}</CardDescription>
             </div>
             <Badge variant="secondary">{roleName || "N/A"}</Badge>
@@ -53,21 +53,21 @@ export default function ProfilePage() {
         <CardContent>
           <form onSubmit={handleSave} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Ho va ten</Label>
+              <Label htmlFor="fullName">Họ và tên</Label>
               <Input
                 id="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Nhap ho va ten"
+                placeholder="Nhập họ và tên"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">So dien thoai</Label>
+              <Label htmlFor="phone">Số điện thoại</Label>
               <Input
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Nhap so dien thoai"
+                placeholder="Nhập số điện thoại"
               />
             </div>
             <div className="space-y-2">
@@ -75,12 +75,12 @@ export default function ProfilePage() {
               <Input value={profile?.email || ""} disabled />
             </div>
             {message && (
-              <p className={`text-sm ${message.includes("Loi") ? "text-red-500" : "text-green-600"}`}>
+              <p className={`text-sm ${message.includes("Lỗi") ? "text-red-500" : "text-green-600"}`}>
                 {message}
               </p>
             )}
             <Button type="submit" disabled={saving}>
-              {saving ? "Dang luu..." : "Luu thay doi"}
+              {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </form>
         </CardContent>

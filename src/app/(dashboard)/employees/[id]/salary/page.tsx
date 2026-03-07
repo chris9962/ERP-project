@@ -80,7 +80,7 @@ export default function EmployeeSalaryPage() {
 
     const amount = parseFloat(formAmount);
     if (isNaN(amount) || amount <= 0) {
-      setFormError("Muc luong khong hop le");
+      setFormError("Mức lương không hợp lệ");
       setFormLoading(false);
       return;
     }
@@ -108,7 +108,7 @@ export default function EmployeeSalaryPage() {
 
     if (!res.ok) {
       const data = await res.json();
-      setFormError("Loi: " + (data.error ?? res.statusText));
+      setFormError("Lỗi: " + (data.error ?? res.statusText));
       setFormLoading(false);
       return;
     }
@@ -132,7 +132,7 @@ export default function EmployeeSalaryPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-neutral-400">
-        Dang tai...
+        Đang tải...
       </div>
     );
   }
@@ -148,7 +148,7 @@ export default function EmployeeSalaryPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Quan ly luong
+              Quản lý lương
             </h1>
             <p className="mt-1 text-sm text-neutral-500">
               {employee?.full_name || "N/A"} ({employee?.employee_code || "N/A"}
@@ -160,16 +160,16 @@ export default function EmployeeSalaryPage() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Cap nhat luong
+              Cập nhật lương
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Cap nhat muc luong</DialogTitle>
+              <DialogTitle>Cập nhật mức lương</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Muc luong moi (VND)</Label>
+                <Label>Mức lương mới (VND)</Label>
                 <Input
                   type="number"
                   value={formAmount}
@@ -181,7 +181,7 @@ export default function EmployeeSalaryPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Ngay ap dung</Label>
+                <Label>Ngày áp dụng</Label>
                 <Input
                   type="date"
                   value={formDate}
@@ -190,11 +190,11 @@ export default function EmployeeSalaryPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Ly do</Label>
+                <Label>Lý do</Label>
                 <Textarea
                   value={formReason}
                   onChange={(e) => setFormReason(e.target.value)}
-                  placeholder="Ly do dieu chinh luong"
+                  placeholder="Lý do điều chỉnh lương"
                   rows={3}
                 />
               </div>
@@ -207,10 +207,10 @@ export default function EmployeeSalaryPage() {
                   variant="outline"
                   onClick={() => setDialogOpen(false)}
                 >
-                  Huy
+                  Hủy
                 </Button>
                 <Button type="submit" disabled={formLoading}>
-                  {formLoading ? "Dang xu ly..." : "Luu"}
+                  {formLoading ? "Đang xử lý..." : "Lưu"}
                 </Button>
               </div>
             </form>
@@ -222,14 +222,14 @@ export default function EmployeeSalaryPage() {
       {currentSalary && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Luong hien tai</CardTitle>
+            <CardTitle className="text-base">Lương hiện tại</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
               {formatCurrency(currentSalary.salary_amount)}
             </div>
             <p className="mt-1 text-sm text-neutral-500">
-              Ap dung tu{" "}
+              Áp dụng từ{" "}
               {new Date(currentSalary.effective_date).toLocaleDateString(
                 "vi-VN",
               )}
@@ -241,22 +241,22 @@ export default function EmployeeSalaryPage() {
       {/* History */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Lich su luong</CardTitle>
+          <CardTitle className="text-base">Lịch sử lương</CardTitle>
         </CardHeader>
         <CardContent>
           {records.length === 0 ? (
             <p className="py-4 text-center text-sm text-neutral-400">
-              Chua co lich su luong
+              Chưa có lịch sử lương
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Muc luong</TableHead>
-                  <TableHead>Tu ngay</TableHead>
-                  <TableHead>Den ngay</TableHead>
-                  <TableHead>Ly do</TableHead>
-                  <TableHead>Ngay tao</TableHead>
+                  <TableHead>Mức lương</TableHead>
+                  <TableHead>Từ ngày</TableHead>
+                  <TableHead>Đến ngày</TableHead>
+                  <TableHead>Lý do</TableHead>
+                  <TableHead>Ngày tạo</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -271,7 +271,7 @@ export default function EmployeeSalaryPage() {
                     <TableCell>
                       {r.end_date
                         ? new Date(r.end_date).toLocaleDateString("vi-VN")
-                        : "Hien tai"}
+                        : "Hiện tại"}
                     </TableCell>
                     <TableCell className="text-neutral-500">
                       {r.reason || "—"}

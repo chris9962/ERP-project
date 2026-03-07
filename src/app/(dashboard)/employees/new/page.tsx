@@ -71,7 +71,7 @@ export default function NewEmployeePage() {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error || "Loi khi tao tai khoan");
+      setError(data.error || "Lỗi khi tạo tài khoản");
       setLoading(false);
       return;
     }
@@ -91,14 +91,14 @@ export default function NewEmployeePage() {
         start_date: startDate,
         status: "active",
         salary_amount: salaryAmount || null,
-        salary_reason: "Luong khoi diem",
+        salary_reason: "Lương khởi điểm",
       }),
       credentials: "include",
     });
 
     if (!empRes.ok) {
       const data = await empRes.json();
-      setError("Loi khi tao nhan vien: " + (data.error ?? empRes.statusText));
+      setError("Lỗi khi tạo nhân viên: " + (data.error ?? empRes.statusText));
       setLoading(false);
       return;
     }
@@ -110,7 +110,7 @@ export default function NewEmployeePage() {
   function handleQrScan() {
     // QR scan placeholder - would integrate camera API
     alert(
-      "Tinh nang scan QR CCCD se duoc tich hop sau. Hien tai vui long nhap tay.",
+      "Tính năng scan QR CCCD sẽ được tích hợp sau. Hiện tại vui lòng nhập tay.",
     );
   }
 
@@ -124,37 +124,37 @@ export default function NewEmployeePage() {
         </Link>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Them nhan vien
+            Thêm nhân viên
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Them nhan vien moi vao he thong
+            Thêm nhân viên mới vào hệ thống
           </p>
         </div>
       </div>
 
       <Tabs defaultValue="manual" className="max-w-2xl">
         <TabsList>
-          <TabsTrigger value="manual">Nhap tay</TabsTrigger>
+          <TabsTrigger value="manual">Nhập tay</TabsTrigger>
           <TabsTrigger value="qr">Scan QR CCCD</TabsTrigger>
         </TabsList>
 
         <TabsContent value="qr">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Scan QR tren CCCD</CardTitle>
+              <CardTitle className="text-base">Scan QR trên CCCD</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50">
                 <div className="text-center">
                   <ScanLine className="mx-auto h-8 w-8 text-neutral-400" />
                   <p className="mt-2 text-sm text-neutral-500">
-                    Nhan vao de mo camera
+                    Nhấn vào để mở camera
                   </p>
                 </div>
               </div>
               <Button variant="outline" className="w-full" onClick={handleQrScan}>
                 <ScanLine className="mr-2 h-4 w-4" />
-                Mo camera scan
+                Mở camera scan
               </Button>
             </CardContent>
           </Card>
@@ -166,7 +166,7 @@ export default function NewEmployeePage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Ho va ten *</Label>
+                    <Label>Họ và tên *</Label>
                     <Input
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -186,7 +186,7 @@ export default function NewEmployeePage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Ma nhan vien</Label>
+                    <Label>Mã nhân viên</Label>
                     <Input
                       value={employeeCode}
                       onChange={(e) => setEmployeeCode(e.target.value)}
@@ -194,10 +194,10 @@ export default function NewEmployeePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Phong ban</Label>
+                    <Label>Phòng ban</Label>
                     <Select value={departmentId} onValueChange={setDepartmentId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chon phong ban" />
+                        <SelectValue placeholder="Chọn phòng ban" />
                       </SelectTrigger>
                       <SelectContent>
                         {departments.map((d) => (
@@ -212,7 +212,7 @@ export default function NewEmployeePage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Loai nhan vien</Label>
+                    <Label>Loại nhân viên</Label>
                     <Select
                       value={employmentType}
                       onValueChange={setEmploymentType}
@@ -221,13 +221,13 @@ export default function NewEmployeePage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="full_time">Toan thoi gian</SelectItem>
-                        <SelectItem value="part_time">Ban thoi gian</SelectItem>
+                        <SelectItem value="full_time">Toàn thời gian</SelectItem>
+                        <SelectItem value="part_time">Bán thời gian</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Ngay vao lam</Label>
+                    <Label>Ngày vào làm</Label>
                     <Input
                       type="date"
                       value={startDate}
@@ -238,7 +238,7 @@ export default function NewEmployeePage() {
 
                 <div className="border-t border-neutral-200 pt-5">
                   <p className="mb-3 text-sm font-medium text-neutral-700">
-                    Tai khoan dang nhap
+                    Tài khoản đăng nhập
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
@@ -252,12 +252,12 @@ export default function NewEmployeePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Mat khau *</Label>
+                      <Label>Mật khẩu *</Label>
                       <Input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Toi thieu 6 ky tu"
+                        placeholder="Tối thiểu 6 ký tự"
                         required
                         minLength={6}
                       />
@@ -267,7 +267,7 @@ export default function NewEmployeePage() {
 
                 <div className="border-t border-neutral-200 pt-5">
                   <div className="max-w-sm space-y-2">
-                    <Label>Muc luong ban dau (VND)</Label>
+                    <Label>Mức lương ban đầu (VND)</Label>
                     <Input
                       type="number"
                       value={salaryAmount}
@@ -283,11 +283,11 @@ export default function NewEmployeePage() {
 
                 <div className="flex gap-3">
                   <Button type="submit" disabled={loading}>
-                    {loading ? "Dang tao..." : "Tao nhan vien"}
+                    {loading ? "Đang tạo..." : "Tạo nhân viên"}
                   </Button>
                   <Link href="/employees">
                     <Button type="button" variant="outline">
-                      Huy
+                      Hủy
                     </Button>
                   </Link>
                 </div>

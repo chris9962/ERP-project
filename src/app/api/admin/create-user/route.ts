@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   if (!email || !password) {
     return NextResponse.json(
-      { error: "Email va mat khau la bat buoc" },
+      { error: "Email và mật khẩu là bắt buộc" },
       { status: 400 },
     );
   }
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
   if (!adminClient.user) {
     return NextResponse.json(
-      { error: "Khong the tao user" },
+      { error: "Không thể tạo user" },
       { status: 500 },
     );
   }

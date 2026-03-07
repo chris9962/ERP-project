@@ -28,7 +28,7 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError("Email hoac mat khau khong dung");
+      setError("Email hoặc mật khẩu không đúng");
       setLoading(false);
       return;
     }
@@ -45,7 +45,7 @@ export default function LoginPage() {
             <Building2 className="h-6 w-6 text-white" />
           </div>
           <CardTitle className="text-xl">ERP System</CardTitle>
-          <CardDescription>Dang nhap de tiep tuc</CardDescription>
+          <CardDescription>Đăng nhập để tiếp tục</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -61,11 +61,11 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Mat khau</Label>
+              <Label htmlFor="password">Mật khẩu</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Nhap mat khau"
+                placeholder="Nhập mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -75,7 +75,7 @@ export default function LoginPage() {
               <p className="text-sm text-red-500">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Dang xu ly..." : "Dang nhap"}
+              {loading ? "Đang xử lý..." : "Đăng nhập"}
             </Button>
           </form>
         </CardContent>

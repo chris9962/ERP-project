@@ -98,9 +98,9 @@ export default function AttendancePage() {
     });
     if (!res.ok) {
       const data = await res.json();
-      setSavedMsg("Loi khi luu: " + (data.error ?? res.statusText));
+      setSavedMsg("Lỗi khi lưu: " + (data.error ?? res.statusText));
     } else {
-      setSavedMsg("Da luu diem danh thanh cong!");
+      setSavedMsg("Đã lưu điểm danh thành công!");
       fetchData();
     }
     setSaving(false);
@@ -116,7 +116,7 @@ export default function AttendancePage() {
     { value: 0.5, label: "0.5" },
     { value: 1, label: "1" },
     { value: 1.5, label: "1.5" },
-    { value: 0, label: "Vang" },
+    { value: 0, label: "Vắng" },
   ];
 
   const totalAttended = Object.values(entries).filter(
@@ -127,21 +127,21 @@ export default function AttendancePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Diem danh</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Điểm danh</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Diem danh nhan vien theo ngay
+            Điểm danh nhân viên theo ngày
           </p>
         </div>
         <Button onClick={handleSaveAll} disabled={saving || loading}>
           <Save className="mr-2 h-4 w-4" />
-          {saving ? "Dang luu..." : "Luu tat ca"}
+          {saving ? "Đang lưu..." : "Lưu tất cả"}
         </Button>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-neutral-500">Ngay</label>
+          <label className="text-xs font-medium text-neutral-500">Ngày</label>
           <Input
             type="date"
             value={date}
@@ -151,14 +151,14 @@ export default function AttendancePage() {
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-neutral-500">
-            Phong ban
+            Phòng ban
           </label>
           <Select value={filterDept} onValueChange={setFilterDept}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Tat ca" />
+              <SelectValue placeholder="Tất cả" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tat ca phong ban</SelectItem>
+              <SelectItem value="all">Tất cả phòng ban</SelectItem>
               {departments.map((d) => (
                 <SelectItem key={d.id} value={d.id}>
                   {d.name}
@@ -170,11 +170,11 @@ export default function AttendancePage() {
         <div className="flex items-end gap-3 pb-0.5">
           <Badge variant="outline" className="flex items-center gap-1.5 py-1.5">
             <CalendarCheck className="h-3.5 w-3.5" />
-            {totalAttended}/{filteredEmployees.length} di lam
+            {totalAttended}/{filteredEmployees.length} đi làm
           </Badge>
           {savedMsg && (
             <span
-              className={`text-sm ${savedMsg.includes("Loi") ? "text-red-500" : "text-emerald-600"}`}
+              className={`text-sm ${savedMsg.includes("Lỗi") ? "text-red-500" : "text-emerald-600"}`}
             >
               {savedMsg}
             </span>
@@ -189,26 +189,26 @@ export default function AttendancePage() {
             <TableRow>
               <TableHead className="w-[50px]">STT</TableHead>
               <TableHead>Ma NV</TableHead>
-              <TableHead>Ho ten</TableHead>
-              <TableHead>Phong ban</TableHead>
+              <TableHead>Họ tên</TableHead>
+              <TableHead>Phòng ban</TableHead>
               <TableHead className="w-[80px] text-center">0.5</TableHead>
               <TableHead className="w-[80px] text-center">1</TableHead>
               <TableHead className="w-[80px] text-center">1.5</TableHead>
-              <TableHead className="w-[80px] text-center">Vang</TableHead>
-              <TableHead className="w-[200px]">Ghi chu</TableHead>
+              <TableHead className="w-[80px] text-center">Vắng</TableHead>
+              <TableHead className="w-[200px]">Ghi chú</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
                 <TableCell colSpan={9} className="py-8 text-center text-neutral-400">
-                  Dang tai...
+                  Đang tải...
                 </TableCell>
               </TableRow>
             ) : filteredEmployees.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="py-8 text-center text-neutral-400">
-                  Khong co nhan vien nao
+                  Không có nhân viên nào
                 </TableCell>
               </TableRow>
             ) : (
@@ -242,7 +242,7 @@ export default function AttendancePage() {
                       <Input
                         value={entry?.note || ""}
                         onChange={(e) => updateNote(emp.id, e.target.value)}
-                        placeholder="Ghi chu..."
+                        placeholder="Ghi chú..."
                         className="h-8 text-sm"
                       />
                     </TableCell>
