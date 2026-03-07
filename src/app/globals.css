@@ -45,3 +45,15 @@ body {
 .animate-loading-bar {
   animation: loadingBar 1s ease-in-out infinite;
 }
+
+/* Scanner CCCD: đảm bảo video từ html5-qrcode hiển thị */
+.cccd-scanner-reader video {
+  width: 100% !important;
+  max-height: 320px;
+  object-fit: cover;
+  display: block;
+  border-radius: 0.5rem;
+}
+.cccd-scanner-reader > div {
+  width: 100%;
+}

@@ -13,9 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, ScanLine } from "lucide-react";
 import Link from "next/link";
+import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 
 type Department = { id: string; name: string };
 
@@ -37,6 +37,7 @@ export default function NewEmployeePage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [salaryAmount, setSalaryAmount] = useState("");
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const fetchDepartments = useCallback(async () => {
     const res = await fetch("/api/departments", { credentials: "include" });
@@ -107,11 +108,10 @@ export default function NewEmployeePage() {
     router.push("/employees");
   }
 
-  function handleQrScan() {
-    // QR scan placeholder - would integrate camera API
-    alert(
-      "Tính năng scan QR CCCD sẽ được tích hợp sau. Hiện tại vui lòng nhập tay.",
-    );
+  function handleQrScanResult(data: { fullName: string; cccdNumber: string | null }) {
+    setFullName(data.fullName);
+    if (data.cccdNumber) setCccdNumber(data.cccdNumber);
+    setScannerOpen(false);
   }
 
   return (
@@ -132,57 +132,42 @@ export default function NewEmployeePage() {
         </div>
       </div>
 
-      <Tabs defaultValue="manual" className="max-w-2xl">
-        <TabsList>
-          <TabsTrigger value="manual">Nhập tay</TabsTrigger>
-          <TabsTrigger value="qr">Scan QR CCCD</TabsTrigger>
-        </TabsList>
+      <Card className="max-w-2xl">
+        <CardContent className="pt-6">
+          <div className="mb-5 flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setScannerOpen(true)}
+            >
+              <ScanLine className="mr-2 h-4 w-4" />
+              Quét CCCD
+            </Button>
+            <span className="text-sm text-neutral-500">
+              Quét mã QR trên CCCD để điền sẵn Họ tên và Số CCCD
+            </span>
+          </div>
 
-        <TabsContent value="qr">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Scan QR trên CCCD</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50">
-                <div className="text-center">
-                  <ScanLine className="mx-auto h-8 w-8 text-neutral-400" />
-                  <p className="mt-2 text-sm text-neutral-500">
-                    Nhấn vào để mở camera
-                  </p>
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Họ và tên *</Label>
+                <Input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Nguyen Van A"
+                  required
+                />
               </div>
-              <Button variant="outline" className="w-full" onClick={handleQrScan}>
-                <ScanLine className="mr-2 h-4 w-4" />
-                Mở camera scan
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="manual">
-          <Card>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Họ và tên *</Label>
-                    <Input
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Nguyen Van A"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>So CCCD</Label>
-                    <Input
-                      value={cccdNumber}
-                      onChange={(e) => setCccdNumber(e.target.value)}
-                      placeholder="012345678901"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label>Số CCCD</Label>
+                <Input
+                  value={cccdNumber}
+                  onChange={(e) => setCccdNumber(e.target.value)}
+                  placeholder="012345678901"
+                />
+              </div>
+            </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
@@ -271,23 +256,27 @@ export default function NewEmployeePage() {
                   </div>
                 </div>
 
-                {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-sm text-red-500">{error}</p>}
 
-                <div className="flex gap-3">
-                  <Button type="submit" disabled={loading}>
-                    {loading ? "Đang tạo..." : "Tạo nhân viên"}
-                  </Button>
-                  <Link href="/employees">
-                    <Button type="button" variant="outline">
-                      Hủy
-                    </Button>
-                  </Link>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <div className="flex gap-3">
+              <Button type="submit" disabled={loading}>
+                {loading ? "Đang tạo..." : "Tạo nhân viên"}
+              </Button>
+              <Link href="/employees">
+                <Button type="button" variant="outline">
+                  Hủy
+                </Button>
+              </Link>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <CCCDQRScanner
+        open={scannerOpen}
+        onCloseAction={() => setScannerOpen(false)}
+        onScanAction={handleQrScanResult}
+      />
     </div>
   );
 }
