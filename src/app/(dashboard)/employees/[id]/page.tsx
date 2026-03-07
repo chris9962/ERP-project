@@ -25,8 +25,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
-import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
-import { HeaderActions } from "@/components/layout/header-actions";
+import { DollarSign, Pencil } from "lucide-react";
+import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
 
 type Department = { id: string; name: string };
 type Employee = {
@@ -168,6 +168,7 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="space-y-6">
+      <HeaderBack href="/employees" />
       <HeaderActions>
         <Link href={`/employees/${id}/salary`}>
           <Button size="sm" variant="outline">
@@ -191,14 +192,6 @@ export default function EmployeeDetailPage() {
           </>
         )}
       </HeaderActions>
-
-      <div className="flex items-center gap-4">
-        <Link href="/employees">
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-      </div>
 
       <Tabs defaultValue="info">
         <TabsList>

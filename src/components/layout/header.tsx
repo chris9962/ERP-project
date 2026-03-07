@@ -16,7 +16,7 @@ export function Header({ onOpenMobileMenuAction }: HeaderProps) {
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 sm:px-6">
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5">
         <Button
           type="button"
           variant="ghost"
@@ -27,6 +27,7 @@ export function Header({ onOpenMobileMenuAction }: HeaderProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
+        <div id="header-back" className="shrink-0" />
         <span className="truncate text-base font-semibold text-neutral-900">
           {pageTitle}
         </span>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,8 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
-import { ArrowLeft, Plus } from "lucide-react";
-import { HeaderActions } from "@/components/layout/header-actions";
+import { Plus } from "lucide-react";
+import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
 
 type Employee = {
   id: string;
@@ -140,20 +139,13 @@ export default function EmployeeSalaryPage() {
 
   return (
     <div className="space-y-6">
+      <HeaderBack href={`/employees/${employeeId}`} />
       <HeaderActions>
         <Button size="sm" onClick={() => setDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Cập nhật lương
         </Button>
       </HeaderActions>
-
-      <div className="flex items-center gap-4">
-        <Link href={`/employees/${employeeId}`}>
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
