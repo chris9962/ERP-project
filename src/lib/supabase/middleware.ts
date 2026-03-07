@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   if (pathname === "/login") {
     if (user) {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = "/";
       return NextResponse.redirect(url);
     }
     return supabaseResponse;
@@ -67,7 +67,7 @@ export async function updateSession(request: NextRequest) {
   for (const [path, allowedRoles] of Object.entries(roleAccess)) {
     if (pathname.startsWith(path) && roleName && !allowedRoles.includes(roleName)) {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = "/";
       return NextResponse.redirect(url);
     }
   }

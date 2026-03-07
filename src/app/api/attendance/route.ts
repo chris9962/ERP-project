@@ -43,12 +43,20 @@ export async function GET(request: Request) {
   }));
   const existing = attRes.data ?? [];
 
-  // Chưa điểm danh = không có bản ghi → value = null (không mặc định "Đủ ngày")
+  // Chuẩn hóa value sang number (Supabase có thể trả về string)
+  const toNum = (v: unknown): number | null => {
+    if (v == null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const validValues = [0, 0.5, 1, 1.5];
   const entries = employees.map((emp) => {
     const record = existing.find((a: { employee_id: string }) => a.employee_id === emp.id);
+    const raw = record != null ? toNum(record.value) : null;
+    const value = raw != null && validValues.includes(raw) ? raw : null;
     return {
       employeeId: emp.id,
-      value: record != null ? record.value : null,
+      value,
       note: record?.note || "",
       existing: !!record,
     };

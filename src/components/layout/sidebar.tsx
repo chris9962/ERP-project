@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
   LayoutDashboard,
+  Activity,
   Users,
   CalendarCheck,
   BarChart3,
@@ -19,13 +20,20 @@ import {
   DollarSign,
   UserCog,
   Building2,
+  X,
 } from "lucide-react";
 
 const navigation = [
   {
+    name: "Trang chủ",
+    href: "/",
+    icon: LayoutDashboard,
+    roles: ["admin", "owner", "manager", "office_staff", "worker"],
+  },
+  {
     name: "Dashboard",
     href: "/dashboard",
-    icon: LayoutDashboard,
+    icon: Activity,
     roles: ["admin", "owner", "manager", "office_staff", "worker"],
   },
   {
@@ -40,18 +48,18 @@ const navigation = [
     icon: CalendarCheck,
     roles: ["admin", "manager", "office_staff"],
   },
-  {
-    name: "Báo cáo lương",
-    href: "/reports/salary",
-    icon: DollarSign,
-    roles: ["admin", "owner"],
-  },
-  {
-    name: "Báo cáo điểm danh",
-    href: "/reports/attendance",
-    icon: BarChart3,
-    roles: ["admin", "owner"],
-  },
+  // {
+  //   name: "Báo cáo lương",
+  //   href: "/reports/salary",
+  //   icon: DollarSign,
+  //   roles: ["admin", "owner"],
+  // },
+  // {
+  //   name: "Báo cáo điểm danh",
+  //   href: "/reports/attendance",
+  //   icon: BarChart3,
+  //   roles: ["admin", "owner"],
+  // },
   {
     name: "Quản lý User",
     href: "/admin/users",
@@ -64,15 +72,20 @@ const navigation = [
     icon: Building2,
     roles: ["admin"],
   },
-  {
-    name: "Cấu hình lương",
-    href: "/admin/salary-config",
-    icon: Settings,
-    roles: ["admin"],
-  },
+  // {
+  //   name: "Cấu hình lương",
+  //   href: "/admin/salary-config",
+  //   icon: Settings,
+  //   roles: ["admin"],
+  // },
 ];
 
-export function Sidebar() {
+type SidebarProps = {
+  mobileOpen?: boolean;
+  onCloseAction?: () => void;
+};
+
+export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { profile, roleName } = useAuth();
@@ -89,16 +102,19 @@ export function Sidebar() {
       .slice(0, 2)
     : "U";
 
-  return (
+  const sidebarContent = (
     <aside
       className={cn(
         "flex h-screen flex-col border-r border-neutral-200 bg-white transition-all duration-300",
-        collapsed ? "w-[68px]" : "w-[260px]",
+        "fixed inset-y-0 left-0 z-50 w-[260px] md:relative md:z-auto md:translate-x-0",
+        "transform transition-transform duration-300 ease-in-out",
+        mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        collapsed ? "md:w-[68px]" : "md:w-[260px]",
       )}
     >
-      {/* Logo */}
+      {/* Logo + collapse / close */}
       <div className="flex h-16 items-center justify-between px-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5" onClick={onCloseAction}>
           <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
             <Image
               src="/logo/logo.jpeg"
@@ -109,23 +125,33 @@ export function Sidebar() {
               priority
             />
           </div>
-          {!collapsed && (
+          {(!collapsed || mobileOpen) && (
             <span className="text-base font-semibold tracking-tight text-neutral-900">
               LegoFood
             </span>
           )}
         </Link>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
-        >
-          <ChevronLeft
-            className={cn(
-              "h-4 w-4 transition-transform",
-              collapsed && "rotate-180",
-            )}
-          />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onCloseAction}
+            className="flex h-7 w-7 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 md:hidden"
+            aria-label="Đóng menu"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="hidden h-7 w-7 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 md:flex"
+          >
+            <ChevronLeft
+              className={cn(
+                "h-4 w-4 transition-transform",
+                collapsed && "rotate-180",
+              )}
+            />
+          </button>
+        </div>
       </div>
 
       <Separator />
@@ -140,6 +166,7 @@ export function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={onCloseAction}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
@@ -148,7 +175,7 @@ export function Sidebar() {
                 )}
               >
                 <item.icon className="h-[18px] w-[18px] shrink-0" />
-                {!collapsed && <span>{item.name}</span>}
+                {(!collapsed || mobileOpen) && <span>{item.name}</span>}
               </Link>
             );
           })}
@@ -161,9 +188,10 @@ export function Sidebar() {
       <div className="p-3">
         <Link
           href="/profile"
+          onClick={onCloseAction}
           className={cn(
             "flex items-center gap-3 rounded-md px-3 py-2.5 hover:bg-neutral-100",
-            collapsed && "justify-center px-0",
+            collapsed && !mobileOpen && "justify-center px-0",
           )}
         >
           <Avatar className="h-8 w-8">
@@ -171,7 +199,7 @@ export function Sidebar() {
               {initials}
             </AvatarFallback>
           </Avatar>
-          {!collapsed && (
+          {(!collapsed || mobileOpen) && (
             <div className="flex-1 truncate">
               <p className="text-sm font-medium text-neutral-900">
                 {profile?.full_name || "User"}
@@ -182,5 +210,20 @@ export function Sidebar() {
         </Link>
       </div>
     </aside>
+  );
+
+  return (
+    <>
+      {/* Backdrop: mobile only, when open */}
+      {mobileOpen && (
+        <button
+          type="button"
+          onClick={onCloseAction}
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          aria-label="Đóng menu"
+        />
+      )}
+      {sidebarContent}
+    </>
   );
 }

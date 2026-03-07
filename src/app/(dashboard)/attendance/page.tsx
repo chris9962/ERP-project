@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save, CalendarCheck } from "lucide-react";
+import { Save, CalendarCheck, Search, EyeOff } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 
 type Employee = {
@@ -50,6 +50,8 @@ export default function AttendancePage() {
   const [entries, setEntries] = useState<Record<string, AttendanceEntry>>({});
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [filterDept, setFilterDept] = useState("all");
+  const [searchName, setSearchName] = useState("");
+  const [hideMarked, setHideMarked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
@@ -69,9 +71,14 @@ export default function AttendancePage() {
     const defaultNoteVal = `${NOTE_BY_LABEL} ${profile?.full_name || "User"}`;
     const entriesWithNote: Record<string, AttendanceEntry> = {};
     for (const [k, v] of Object.entries(rawEntries)) {
+      const val = v.value;
+      const numVal = val == null ? null : Number(val);
+      const value =
+        numVal != null && Number.isFinite(numVal) ? numVal : (val as number | null);
       entriesWithNote[k] = {
         ...v,
         employeeId: v.employeeId || k,
+        value: value as number | null,
         note: v.note?.trim() ? v.note : defaultNoteVal,
       };
     }
@@ -130,11 +137,22 @@ export default function AttendancePage() {
     setSaving(false);
   }
 
-  const filteredEmployees = employees.filter(
-    (emp) =>
-      filterDept === "all" ||
-      (emp.departments as { id: string } | null)?.id === filterDept,
-  );
+  const filteredEmployees = employees
+    .filter(
+      (emp) =>
+        filterDept === "all" ||
+        (emp.departments as { id: string } | null)?.id === filterDept,
+    )
+    .filter((emp) => {
+      const name = (emp.full_name || "").toLowerCase();
+      const q = searchName.trim().toLowerCase();
+      return !q || name.includes(q);
+    })
+    .filter((emp) => {
+      if (!hideMarked) return true;
+      const entry = entries[emp.id];
+      return entry?.value == null;
+    });
 
   const valueOptions = [
     { value: 0.5, label: "Nửa ngày" },
@@ -163,37 +181,42 @@ export default function AttendancePage() {
   const summaryText = summaryParts.length > 0 ? summaryParts.join(" · ") : "Chưa điểm danh";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header: title + Lưu tất cả — responsive stack */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Điểm danh</h1>
+          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Điểm danh</h1>
           <p className="mt-1 text-sm text-neutral-500">
             Điểm danh nhân viên theo ngày
           </p>
         </div>
-        <Button onClick={handleSaveAll} disabled={saving || loading}>
+        <Button
+          onClick={handleSaveAll}
+          disabled={saving || loading}
+          className="w-full sm:w-auto shrink-0"
+        >
           <Save className="mr-2 h-4 w-4" />
           {saving ? "Đang lưu..." : "Lưu tất cả"}
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="space-y-1">
+      {/* Filters — wrap, full width on mobile */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="space-y-1 sm:min-w-0">
           <label className="text-xs font-medium text-neutral-500">Ngày</label>
           <Input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-[180px]"
+            className="w-full sm:w-[180px]"
           />
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1 sm:min-w-0">
           <label className="text-xs font-medium text-neutral-500">
             Phòng ban
           </label>
           <Select value={filterDept} onValueChange={setFilterDept}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Tất cả" />
             </SelectTrigger>
             <SelectContent>
@@ -206,11 +229,30 @@ export default function AttendancePage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-wrap items-end gap-3 pb-0.5">
-          <Badge variant="outline" className="flex items-center gap-1.5 py-1.5">
-            <CalendarCheck className="h-3.5 w-3.5" />
-            {summaryText}
-          </Badge>
+        <div className="space-y-1 sm:min-w-0">
+          <label className="text-xs font-medium text-neutral-500">Tìm theo tên</label>
+          <div className="relative w-full sm:w-[200px]">
+            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <Input
+              type="text"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              placeholder="Tên nhân viên..."
+              className="h-9 pl-8"
+            />
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant={hideMarked ? "default" : "outline"}
+          size="sm"
+          onClick={() => setHideMarked((v) => !v)}
+          className="w-full sm:w-auto shrink-0"
+        >
+          <EyeOff className="mr-2 h-4 w-4" />
+          {hideMarked ? "Đang ẩn đã điểm danh" : "Ẩn người đã điểm danh"}
+        </Button>
+        <div className="flex flex-wrap items-center gap-2 sm:pb-0.5">
           {savedMsg && (
             <span
               className={`text-sm ${savedMsg.includes("Lỗi") ? "text-red-500" : "text-emerald-600"}`}
@@ -221,8 +263,8 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border border-neutral-200 bg-white">
+      {/* Desktop: table */}
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         <Table>
           <TableHeader>
             <TableRow>
@@ -268,8 +310,8 @@ export default function AttendancePage() {
                       <TableCell key={opt.value} className="text-center">
                         <input
                           type="radio"
-                          name={`attendance-${emp.id}`}
-                          checked={entry?.value === opt.value}
+                          name={`attendance-table-${emp.id}`}
+                          checked={entry?.value != null && Number(entry.value) === opt.value}
                           onChange={() => updateValue(emp.id, opt.value)}
                           className="h-4 w-4 cursor-pointer accent-neutral-900"
                         />
@@ -289,6 +331,61 @@ export default function AttendancePage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile: card list */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <LoadingBars message="Đang tải..." />
+          </div>
+        ) : filteredEmployees.length === 0 ? (
+          <p className="py-8 text-center text-neutral-400">Không có nhân viên nào</p>
+        ) : (
+          filteredEmployees.map((emp, idx) => {
+            const entry = entries[emp.id];
+            return (
+              <div
+                key={emp.id}
+                className="rounded-lg border border-neutral-200 bg-white p-4 space-y-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-medium text-neutral-900">
+                      {idx + 1}. {emp.full_name || "—"}
+                    </p>
+                    <p className="text-sm text-neutral-500">
+                      {(emp.departments as { name: string } | null)?.name || "—"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {valueOptions.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center gap-2 cursor-pointer text-sm"
+                    >
+                      <input
+                        type="radio"
+                        name={`attendance-card-${emp.id}`}
+                        checked={entry?.value != null && Number(entry.value) === opt.value}
+                        onChange={() => updateValue(emp.id, opt.value)}
+                        className="h-4 w-4 accent-neutral-900"
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+                <Input
+                  value={entry?.note || defaultNote}
+                  onChange={(e) => updateNote(emp.id, e.target.value)}
+                  placeholder={defaultNote}
+                  className="h-9 text-sm"
+                />
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
