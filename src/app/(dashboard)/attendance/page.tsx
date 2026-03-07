@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Save, CalendarCheck } from "lucide-react";
+import LoadingBars from "@/components/ui/loading-bars";
 
 type Employee = {
   id: string;
@@ -32,14 +34,17 @@ type Employee = {
 
 type AttendanceEntry = {
   employeeId: string;
-  value: number;
+  value: number | null;
   note: string;
   existing: boolean;
 };
 
 type Department = { id: string; name: string };
 
+const NOTE_BY_LABEL = "Điểm danh bởi";
+
 export default function AttendancePage() {
+  const { profile } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [entries, setEntries] = useState<Record<string, AttendanceEntry>>({});
@@ -60,19 +65,35 @@ export default function AttendancePage() {
     const data = await res.json();
     setEmployees((data.employees || []) as Employee[]);
     setDepartments(data.departments || []);
-    setEntries(data.entries || {});
+    const rawEntries = (data.entries || {}) as Record<string, AttendanceEntry>;
+    const defaultNoteVal = `${NOTE_BY_LABEL} ${profile?.full_name || "User"}`;
+    const entriesWithNote: Record<string, AttendanceEntry> = {};
+    for (const [k, v] of Object.entries(rawEntries)) {
+      entriesWithNote[k] = {
+        ...v,
+        employeeId: v.employeeId || k,
+        note: v.note?.trim() ? v.note : defaultNoteVal,
+      };
+    }
+    setEntries(entriesWithNote);
     setLoading(false);
-  }, [date]);
+  }, [date, profile?.full_name]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  function updateValue(empId: string, value: number) {
-    setEntries((prev) => ({
-      ...prev,
-      [empId]: { ...prev[empId], value },
-    }));
+  const defaultNote = `${NOTE_BY_LABEL} ${profile?.full_name || "User"}`;
+
+  function updateValue(empId: string, value: number | null) {
+    setEntries((prev) => {
+      const current = prev[empId];
+      const note = current?.note?.trim() ? current.note : defaultNote;
+      return {
+        ...prev,
+        [empId]: { ...current, employeeId: empId, value, note },
+      };
+    });
   }
 
   function updateNote(empId: string, note: string) {
@@ -85,11 +106,14 @@ export default function AttendancePage() {
   async function handleSaveAll() {
     setSaving(true);
     setSavedMsg("");
-    const entriesList = Object.values(entries).map((entry) => ({
-      employeeId: entry.employeeId,
-      value: entry.value,
-      note: entry.note || null,
-    }));
+    // Chỉ gửi nhân viên đã được chọn (đã điểm danh); bỏ qua chưa chọn (value === null)
+    const entriesList = Object.values(entries)
+      .filter((entry) => entry.value != null)
+      .map((entry) => ({
+        employeeId: entry.employeeId,
+        value: entry.value as number,
+        note: (entry.note?.trim() || defaultNote) || null,
+      }));
     const res = await fetch("/api/attendance", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -113,15 +137,30 @@ export default function AttendancePage() {
   );
 
   const valueOptions = [
-    { value: 0.5, label: "0.5" },
-    { value: 1, label: "1" },
-    { value: 1.5, label: "1.5" },
+    { value: 0.5, label: "Nửa ngày" },
+    { value: 1, label: "Đủ ngày" },
+    { value: 1.5, label: "Tăng ca" },
     { value: 0, label: "Vắng" },
   ];
 
-  const totalAttended = Object.values(entries).filter(
-    (e) => e.value > 0,
-  ).length;
+  const totalAttended = Object.values(entries).filter((e) => e.value != null && e.value > 0).length;
+  const countByValue = valueOptions.reduce(
+    (acc, opt) => {
+      acc[opt.value] = Object.values(entries).filter((e) => e.value === opt.value).length;
+      return acc;
+    },
+    {} as Record<number, number>,
+  );
+  const summaryLabels: Record<number, string> = {
+    0.5: "ngày làm nửa ngày",
+    1: "ngày đủ ngày",
+    1.5: "tăng ca",
+    0: "vắng",
+  };
+  const summaryParts = valueOptions
+    .filter((opt) => countByValue[opt.value] > 0)
+    .map((opt) => `${countByValue[opt.value]} ${summaryLabels[opt.value]}`);
+  const summaryText = summaryParts.length > 0 ? summaryParts.join(" · ") : "Chưa điểm danh";
 
   return (
     <div className="space-y-6">
@@ -167,10 +206,10 @@ export default function AttendancePage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-end gap-3 pb-0.5">
+        <div className="flex flex-wrap items-end gap-3 pb-0.5">
           <Badge variant="outline" className="flex items-center gap-1.5 py-1.5">
             <CalendarCheck className="h-3.5 w-3.5" />
-            {totalAttended}/{filteredEmployees.length} đi làm
+            {summaryText}
           </Badge>
           {savedMsg && (
             <span
@@ -188,12 +227,11 @@ export default function AttendancePage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">STT</TableHead>
-              <TableHead>Ma NV</TableHead>
               <TableHead>Họ tên</TableHead>
               <TableHead>Phòng ban</TableHead>
-              <TableHead className="w-[80px] text-center">0.5</TableHead>
-              <TableHead className="w-[80px] text-center">1</TableHead>
-              <TableHead className="w-[80px] text-center">1.5</TableHead>
+              <TableHead className="w-[90px] text-center">Nửa ngày</TableHead>
+              <TableHead className="w-[90px] text-center">Đủ ngày</TableHead>
+              <TableHead className="w-[90px] text-center">Tăng ca</TableHead>
               <TableHead className="w-[80px] text-center">Vắng</TableHead>
               <TableHead className="w-[200px]">Ghi chú</TableHead>
             </TableRow>
@@ -201,13 +239,15 @@ export default function AttendancePage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="py-8 text-center text-neutral-400">
-                  Đang tải...
+                <TableCell colSpan={8} className="py-8">
+                  <div className="flex justify-center">
+                    <LoadingBars message="Đang tải..." />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="py-8 text-center text-neutral-400">
+                <TableCell colSpan={8} className="py-8 text-center text-neutral-400">
                   Không có nhân viên nào
                 </TableCell>
               </TableRow>
@@ -217,9 +257,6 @@ export default function AttendancePage() {
                 return (
                   <TableRow key={emp.id}>
                     <TableCell className="text-neutral-400">{idx + 1}</TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {emp.employee_code || "—"}
-                    </TableCell>
                     <TableCell className="font-medium">
                       {emp.full_name || "—"}
                     </TableCell>
@@ -240,9 +277,9 @@ export default function AttendancePage() {
                     ))}
                     <TableCell>
                       <Input
-                        value={entry?.note || ""}
+                        value={entry?.note || defaultNote}
                         onChange={(e) => updateNote(emp.id, e.target.value)}
-                        placeholder="Ghi chú..."
+                        placeholder={defaultNote}
                         className="h-8 text-sm"
                       />
                     </TableCell>

@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Search, Eye } from "lucide-react";
+import LoadingBars from "@/components/ui/loading-bars";
 
 type Employee = {
   id: string;
@@ -153,7 +154,6 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ma NV</TableHead>
               <TableHead>Họ tên</TableHead>
               <TableHead>Phòng ban</TableHead>
               <TableHead>Loại</TableHead>
@@ -165,22 +165,21 @@ export default function EmployeesPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-neutral-400">
-                  Đang tải...
+                <TableCell colSpan={6} className="py-8">
+                  <div className="flex justify-center">
+                    <LoadingBars message="Đang tải..." />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-neutral-400">
+                <TableCell colSpan={6} className="py-8 text-center text-neutral-400">
                   Không có nhân viên nào
                 </TableCell>
               </TableRow>
             ) : (
               filtered.map((emp) => (
                 <TableRow key={emp.id}>
-                  <TableCell className="font-mono text-sm">
-                    {emp.employee_code || "—"}
-                  </TableCell>
                   <TableCell className="font-medium">
                     {emp.full_name || emp.profiles?.full_name || "—"}
                   </TableCell>

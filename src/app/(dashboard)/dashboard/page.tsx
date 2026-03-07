@@ -1,11 +1,70 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Users, CalendarCheck, DollarSign, Building2 } from "lucide-react";
+import { CalendarCheck } from "lucide-react";
+
+function getTodayISO() {
+  return new Date().toISOString().split("T")[0];
+}
+
+type AttendanceCounts = {
+  fullDay: number;
+  halfDay: number;
+  overtime: number;
+  absent: number;
+  notMarked: number;
+};
 
 export default function DashboardPage() {
-  const { profile, roleName } = useAuth();
+  const { profile } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [counts, setCounts] = useState<AttendanceCounts>({
+    fullDay: 0,
+    halfDay: 0,
+    overtime: 0,
+    absent: 0,
+    notMarked: 0,
+  });
+  const [totalEmployees, setTotalEmployees] = useState(0);
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    const today = getTodayISO();
+    const attRes = await fetch(`/api/attendance?date=${today}`, { credentials: "include" });
+    if (attRes.ok) {
+      const attData = (await attRes.json()) as {
+        employees?: unknown[];
+        entries?: Record<string, { value: number | null }>;
+      };
+      const empList = attData.employees ?? [];
+      const entries = attData.entries ?? {};
+      setTotalEmployees(empList.length);
+
+      const values = Object.values(entries).map((e) => e.value);
+      setCounts({
+        fullDay: values.filter((v) => v === 1).length,
+        halfDay: values.filter((v) => v === 0.5).length,
+        overtime: values.filter((v) => v === 1.5).length,
+        absent: values.filter((v) => v === 0).length,
+        notMarked: values.filter((v) => v == null).length,
+      });
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  const lines = [
+    { count: counts.fullDay, label: "người làm đủ ngày(1)" },
+    { count: counts.halfDay, label: "người làm nửa ngày(0.5)" },
+    { count: counts.overtime, label: "người tăng ca(1.5)" },
+    { count: counts.absent, label: "người vắng" },
+  ].filter((l) => l.count > 0);
 
   return (
     <div className="space-y-6">
@@ -17,53 +76,37 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-500">Nhân viên</CardTitle>
-            <Users className="h-4 w-4 text-neutral-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-neutral-500">Đang hoạt động</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-500">Điểm danh hôm nay</CardTitle>
-            <CalendarCheck className="h-4 w-4 text-neutral-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0/0</div>
-            <p className="text-xs text-neutral-500">Đã điểm danh</p>
-          </CardContent>
-        </Card>
-
-        {(roleName === "admin" || roleName === "owner") && (
-          <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-neutral-500">Tổng lương tháng</CardTitle>
-                <DollarSign className="h-4 w-4 text-neutral-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0 VND</div>
-                <p className="text-xs text-neutral-500">Tháng hiện tại</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-neutral-500">Phòng ban</CardTitle>
-                <Building2 className="h-4 w-4 text-neutral-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-neutral-500">Đang hoạt động</p>
-              </CardContent>
-            </Card>
-          </>
-        )}
+        <Link
+          href={`/reports/attendance?from=${getTodayISO()}&to=${getTodayISO()}`}
+          className="block transition-opacity hover:opacity-90"
+        >
+          <Card className="cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-neutral-500">Điểm danh hôm nay</CardTitle>
+              <CalendarCheck className="h-4 w-4 text-neutral-400" />
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-neutral-400">—</div>
+              ) : lines.length === 0 && counts.notMarked === totalEmployees ? (
+                <p className="text-sm text-neutral-500">Chưa điểm danh</p>
+              ) : (
+                <ul className="space-y-1.5 text-sm">
+                  {lines.map(({ count, label }) => (
+                    <li key={label}>
+                      <span className="font-semibold">{count}</span> {label}
+                    </li>
+                  ))}
+                  {counts.notMarked > 0 && (
+                    <li className="text-neutral-500">
+                      <span className="font-semibold">{counts.notMarked}</span> chưa điểm danh
+                    </li>
+                  )}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   );

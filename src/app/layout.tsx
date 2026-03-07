@@ -13,9 +13,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+
 export const metadata: Metadata = {
-  title: "ERP System - Quản lý Doanh nghiệp",
-  description: "Hệ thống quản lý nhân sự và chấm công",
+  title: "LegoFood - Quản lý Doanh nghiệp",
+  description: "LegoFood - Hệ thống quản lý nhân sự và chấm công",
+  icons: {
+    icon: [
+      { url: `${baseUrl}/logo/logo.jpeg`, type: "image/jpeg" },
+      { url: `${baseUrl}/logo/logo.jpeg`, type: "image/jpeg", sizes: "32x32" },
+    ],
+    apple: [{ url: `${baseUrl}/logo/logo.jpeg`, type: "image/jpeg" }],
+  },
 };
 
 export default function RootLayout({

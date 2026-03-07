@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import LoadingBars from "@/components/ui/loading-bars";
 import { ArrowLeft, Plus } from "lucide-react";
 
 type Employee = {
@@ -131,8 +132,8 @@ export default function EmployeeSalaryPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-neutral-400">
-        Đang tải...
+      <div className="flex min-h-[200px] items-center justify-center py-20">
+        <LoadingBars message="Đang tải..." />
       </div>
     );
   }
@@ -151,8 +152,7 @@ export default function EmployeeSalaryPage() {
               Quản lý lương
             </h1>
             <p className="mt-1 text-sm text-neutral-500">
-              {employee?.full_name || "N/A"} ({employee?.employee_code || "N/A"}
-              )
+              {employee?.full_name || "N/A"}
             </p>
           </div>
         </div>

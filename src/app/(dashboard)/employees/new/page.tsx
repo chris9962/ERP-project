@@ -186,14 +186,6 @@ export default function NewEmployeePage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Mã nhân viên</Label>
-                    <Input
-                      value={employeeCode}
-                      onChange={(e) => setEmployeeCode(e.target.value)}
-                      placeholder="NV001"
-                    />
-                  </div>
-                  <div className="space-y-2">
                     <Label>Phòng ban</Label>
                     <Select value={departmentId} onValueChange={setDepartmentId}>
                       <SelectTrigger>

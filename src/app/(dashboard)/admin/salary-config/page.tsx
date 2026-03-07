@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Pencil } from "lucide-react";
+import LoadingBars from "@/components/ui/loading-bars";
 
 type SalaryConfig = {
   id: string;
@@ -139,8 +140,10 @@ export default function SalaryConfigPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
-                  Đang tải...
+                <TableCell colSpan={5} className="py-8">
+                  <div className="flex justify-center">
+                    <LoadingBars message="Đang tải..." />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : configs.length === 0 ? (

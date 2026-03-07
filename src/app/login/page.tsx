@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Building2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,10 +41,17 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-neutral-50">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900">
-            <Building2 className="h-6 w-6 text-white" />
+          <div className="relative mx-auto mb-3 h-12 w-12 overflow-hidden rounded-xl bg-neutral-100">
+            <Image
+              src="/logo/logo.jpeg"
+              alt="LegoFood"
+              fill
+              className="object-cover"
+              sizes="48px"
+              priority
+            />
           </div>
-          <CardTitle className="text-xl">ERP System</CardTitle>
+          <CardTitle className="text-xl">LegoFood</CardTitle>
           <CardDescription>Đăng nhập để tiếp tục</CardDescription>
         </CardHeader>
         <CardContent>

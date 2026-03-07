@@ -1,3 +1,4 @@
+export { default as LoadingBars } from "./loading-bars";
 export { Button, buttonVariants } from "./button";
 export { Input } from "./input";
 export { Label } from "./label";

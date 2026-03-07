@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -20,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarCheck, Users, AlertTriangle, TrendingUp } from "lucide-react";
+import { Users, AlertTriangle, TrendingUp } from "lucide-react";
+import LoadingBars from "@/components/ui/loading-bars";
 
 type Department = { id: string; name: string };
 
@@ -36,20 +38,32 @@ type AttendanceRow = {
   overtime_days: number;
 };
 
+function getFirstDayOfMonth() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+}
+function getLastDayOfMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+}
+
 export default function AttendanceReportPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [rows, setRows] = useState<AttendanceRow[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterDept, setFilterDept] = useState("all");
 
-  const now = new Date();
-  const [fromDate, setFromDate] = useState(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`,
+  const fromParam = searchParams.get("from");
+  const toParam = searchParams.get("to");
+  const [fromDate, setFromDate] = useState(() =>
+    fromParam && /^\d{4}-\d{2}-\d{2}$/.test(fromParam) ? fromParam : getFirstDayOfMonth(),
   );
-  const [toDate, setToDate] = useState(
-    new Date(now.getFullYear(), now.getMonth() + 1, 0)
-      .toISOString()
-      .split("T")[0],
+  const [toDate, setToDate] = useState(() =>
+    toParam && /^\d{4}-\d{2}-\d{2}$/.test(toParam) ? toParam : getLastDayOfMonth(),
   );
 
   const fetchDepartments = useCallback(async () => {
@@ -81,9 +95,35 @@ export default function AttendanceReportPage() {
     setLoading(false);
   }
 
+  // Sync URL when from/to change (user picked new dates)
+  const updateUrl = useCallback(
+    (from: string, to: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("from", from);
+      params.set("to", to);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
+
+  // Sync state from URL when navigating (e.g. from dashboard with ?from=&to=)
+  useEffect(() => {
+    if (fromParam && /^\d{4}-\d{2}-\d{2}$/.test(fromParam)) setFromDate(fromParam);
+    if (toParam && /^\d{4}-\d{2}-\d{2}$/.test(toParam)) setToDate(toParam);
+  }, [fromParam, toParam]);
+
   useEffect(() => {
     fetchReport();
-  }, []);
+  }, [fromDate, toDate, filterDept]);
+
+  const handleFromDateChange = (value: string) => {
+    setFromDate(value);
+    updateUrl(value, toDate);
+  };
+  const handleToDateChange = (value: string) => {
+    setToDate(value);
+    updateUrl(fromDate, value);
+  };
 
   const totalEmployees = rows.length;
   const avgDays =
@@ -91,13 +131,6 @@ export default function AttendanceReportPage() {
       ? rows.reduce((sum, r) => sum + r.total_days, 0) / totalEmployees
       : 0;
   const totalAbsent = rows.reduce((sum, r) => sum + r.absent_days, 0);
-  const attendanceRate =
-    totalEmployees > 0
-      ? (
-          (rows.filter((r) => r.total_days > 0).length / totalEmployees) *
-          100
-        ).toFixed(1)
-      : "0";
 
   // Top absent employees
   const topAbsent = [...rows]
@@ -123,7 +156,7 @@ export default function AttendanceReportPage() {
           <Input
             type="date"
             value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
+            onChange={(e) => handleFromDateChange(e.target.value)}
             className="w-[170px]"
           />
         </div>
@@ -132,7 +165,7 @@ export default function AttendanceReportPage() {
           <Input
             type="date"
             value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
+            onChange={(e) => handleToDateChange(e.target.value)}
             className="w-[170px]"
           />
         </div>
@@ -160,7 +193,7 @@ export default function AttendanceReportPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
@@ -181,17 +214,6 @@ export default function AttendanceReportPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{avgDays.toFixed(1)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-500">
-              Tỉ lệ đi làm
-            </CardTitle>
-            <CalendarCheck className="h-4 w-4 text-neutral-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{attendanceRate}%</div>
           </CardContent>
         </Card>
         <Card>
@@ -236,7 +258,6 @@ export default function AttendanceReportPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mã NV</TableHead>
               <TableHead>Họ tên</TableHead>
               <TableHead>Phòng ban</TableHead>
               <TableHead className="text-right">Nửa ngày</TableHead>
@@ -249,22 +270,21 @@ export default function AttendanceReportPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="py-8 text-center text-neutral-400">
-                  Đang tải...
+                <TableCell colSpan={7} className="py-8">
+                  <div className="flex justify-center">
+                    <LoadingBars message="Đang tải..." />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="py-8 text-center text-neutral-400">
+                <TableCell colSpan={7} className="py-8 text-center text-neutral-400">
                   Không có dữ liệu. Nhấn &quot;Xem báo cáo&quot; để tải.
                 </TableCell>
               </TableRow>
             ) : (
               rows.map((r) => (
                 <TableRow key={r.employee_id}>
-                  <TableCell className="font-mono text-sm">
-                    {r.employee_code || "—"}
-                  </TableCell>
                   <TableCell className="font-medium">{r.full_name}</TableCell>
                   <TableCell className="text-neutral-500">
                     {r.department_name || "—"}

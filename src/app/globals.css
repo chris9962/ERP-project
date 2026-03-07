@@ -29,3 +29,19 @@ body {
 * {
   border-color: var(--border);
 }
+
+@keyframes loadingBar {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.animate-loading-bar {
+  animation: loadingBar 1s ease-in-out infinite;
+}

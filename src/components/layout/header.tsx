@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,21 @@ export function Header() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6">
-      <div />
+      <Link href="/dashboard" className="flex items-center gap-2.5">
+        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+          <Image
+            src="/logo/logo.jpeg"
+            alt="LegoFood"
+            fill
+            className="object-cover"
+            sizes="32px"
+            priority
+          />
+        </div>
+        <span className="text-base font-semibold tracking-tight text-neutral-900">
+          LegoFood
+        </span>
+      </Link>
 
       {/* Actions */}
       <div className="flex items-center gap-2">

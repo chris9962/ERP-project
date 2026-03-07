@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Download, DollarSign, Users, TrendingUp } from "lucide-react";
+import LoadingBars from "@/components/ui/loading-bars";
 
 type Department = { id: string; name: string };
 
@@ -92,7 +93,6 @@ export default function SalaryReportPage() {
 
   function exportCSV() {
     const headers = [
-      "Mã NV",
       "Họ tên",
       "Phòng ban",
       "Lương cơ bản",
@@ -103,7 +103,6 @@ export default function SalaryReportPage() {
       headers.join(","),
       ...rows.map((r) =>
         [
-          r.employee_code,
           r.full_name,
           r.department_name,
           r.salary_amount,
@@ -231,7 +230,6 @@ export default function SalaryReportPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mã NV</TableHead>
               <TableHead>Họ tên</TableHead>
               <TableHead>Phòng ban</TableHead>
               <TableHead className="text-right">Lương cơ bản</TableHead>
@@ -242,13 +240,15 @@ export default function SalaryReportPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-neutral-400">
-                  Đang tải...
+                <TableCell colSpan={5} className="py-8">
+                  <div className="flex justify-center">
+                    <LoadingBars message="Đang tải..." />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-neutral-400">
+                <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
                   Không có dữ liệu. Nhấn &quot;Xem báo cáo&quot; để tải.
                 </TableCell>
               </TableRow>
@@ -256,9 +256,6 @@ export default function SalaryReportPage() {
               <>
                 {rows.map((r) => (
                   <TableRow key={r.employee_id}>
-                    <TableCell className="font-mono text-sm">
-                      {r.employee_code || "—"}
-                    </TableCell>
                     <TableCell className="font-medium">{r.full_name}</TableCell>
                     <TableCell className="text-neutral-500">
                       {r.department_name || "—"}

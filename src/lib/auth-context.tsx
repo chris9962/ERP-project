@@ -50,7 +50,7 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
-  const { data, isPending, isFetching, refetch } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: AUTH_ME_KEY,
     queryFn: fetchAuthMe,
     staleTime: 5 * 60 * 1000,
@@ -60,7 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = data?.user ?? null;
   const profile = data?.profile ?? null;
   const roleName = (profile?.roles as { name: string } | null)?.name ?? null;
-  const loading = isPending || isFetching;
+  // Chỉ show loading khi chưa có data lần đầu (isPending). Refetch sau onAuthStateChange
+  // không làm loading bật lại, tránh flash loading 2 lần.
+  const loading = isPending;
 
   useEffect(() => {
     const supabase = createClient();

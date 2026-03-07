@@ -25,21 +25,30 @@ export async function GET(request: Request) {
   ]);
 
   if (empRes.error) return NextResponse.json({ error: empRes.error.message }, { status: 500 });
-  const employees = (empRes.data ?? []) as Array<{
+  type EmpFromDb = {
     id: string;
     employee_code: string | null;
     full_name: string | null;
     department_id: string | null;
-    departments: { id: string; name: string } | null;
+    departments: { id: string; name: string }[] | null;
     status: string;
-  }>;
+  };
+  type Employee = Omit<EmpFromDb, "departments"> & {
+    departments: { id: string; name: string } | null;
+  };
+  const raw = (empRes.data ?? []) as EmpFromDb[];
+  const employees: Employee[] = raw.map((emp) => ({
+    ...emp,
+    departments: Array.isArray(emp.departments) ? emp.departments[0] ?? null : emp.departments,
+  }));
   const existing = attRes.data ?? [];
 
+  // Chưa điểm danh = không có bản ghi → value = null (không mặc định "Đủ ngày")
   const entries = employees.map((emp) => {
     const record = existing.find((a: { employee_id: string }) => a.employee_id === emp.id);
     return {
       employeeId: emp.id,
-      value: record ? record.value : 1,
+      value: record != null ? record.value : null,
       note: record?.note || "",
       existing: !!record,
     };
@@ -60,10 +69,8 @@ export async function POST(request: Request) {
   const body = await request.json();
   const { date, entries } = body as { date: string; entries: Array<{ employeeId: string; value: number; note: string | null }> };
 
-  if (!date || !entries?.length)
-    return NextResponse.json({ error: "date and entries required" }, { status: 400 });
-
-  const toUpsert = entries.map((e) => ({
+  if (!date) return NextResponse.json({ error: "date required" }, { status: 400 });
+  const toUpsert = (entries ?? []).map((e) => ({
     employee_id: e.employeeId,
     date,
     value: e.value,
@@ -72,7 +79,10 @@ export async function POST(request: Request) {
   }));
 
   await supabase.from("attendance").delete().eq("date", date);
-  const { error } = await supabase.from("attendance").insert(toUpsert);
+  const { error } =
+    toUpsert.length > 0
+      ? await supabase.from("attendance").insert(toUpsert)
+      : { error: null };
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

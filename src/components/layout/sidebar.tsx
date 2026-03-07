@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -15,9 +16,9 @@ import {
   BarChart3,
   Settings,
   ChevronLeft,
-  Building2,
   DollarSign,
   UserCog,
+  Building2,
 } from "lucide-react";
 
 const navigation = [
@@ -98,12 +99,19 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900">
-            <Building2 className="h-4 w-4 text-white" />
+          <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+            <Image
+              src="/logo/logo.jpeg"
+              alt="LegoFood"
+              fill
+              className="object-cover"
+              sizes="32px"
+              priority
+            />
           </div>
           {!collapsed && (
             <span className="text-base font-semibold tracking-tight text-neutral-900">
-              ERP System
+              LegoFood
             </span>
           )}
         </Link>

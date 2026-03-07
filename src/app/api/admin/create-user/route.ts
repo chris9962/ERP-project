@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
 
-  // Verify caller is admin
+  // Verify caller is admin (use regular client with user session)
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -33,34 +34,54 @@ export async function POST(request: Request) {
     );
   }
 
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch (e) {
+    console.error("[create-user] createAdminClient failed:", e);
+    return NextResponse.json(
+      { error: "Không thể tạo user (kiểm tra cấu hình server)" },
+      { status: 500 },
+    );
+  }
+
   // Determine role_id
   let finalRoleId = role_id;
   if (!finalRoleId && role_name) {
-    const { data: role } = await supabase
+    const { data: role } = await admin
       .from("roles")
       .select("id")
       .eq("name", role_name)
       .single();
-    finalRoleId = role?.id || null;
+    finalRoleId = role?.id ?? null;
   }
 
-  // Create user via Supabase Admin API
-  const { data: adminClient } = await supabase.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { full_name },
-  });
+  // Create user via Supabase Admin API (requires service role key)
+  const { data: createData, error: createError } =
+    await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name },
+    });
 
-  if (!adminClient.user) {
+  if (createError) {
+    console.error("[create-user] admin.createUser error:", createError);
+    return NextResponse.json(
+      { error: createError.message || "Không thể tạo user" },
+      { status: 500 },
+    );
+  }
+
+  if (!createData.user) {
     return NextResponse.json(
       { error: "Không thể tạo user" },
       { status: 500 },
     );
   }
 
-  // Update the auto-created profile with role
-  await supabase
+  // Update the auto-created profile with role (trigger only sets id, email, full_name)
+  const { error: updateError } = await admin
     .from("profiles")
     .update({
       full_name: full_name || null,
@@ -68,7 +89,12 @@ export async function POST(request: Request) {
       role_id: finalRoleId,
       email,
     })
-    .eq("id", adminClient.user.id);
+    .eq("id", createData.user.id);
 
-  return NextResponse.json({ userId: adminClient.user.id });
+  if (updateError) {
+    console.error("[create-user] profile update error:", updateError);
+    // User was created; still return success but log the issue
+  }
+
+  return NextResponse.json({ userId: createData.user.id });
 }

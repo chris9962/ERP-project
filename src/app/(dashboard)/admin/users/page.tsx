@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import LoadingBars from "@/components/ui/loading-bars";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 
 type Role = { id: string; name: string; description: string | null };
@@ -312,8 +313,10 @@ export default function AdminUsersPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
-                  Đang tải...
+                <TableCell colSpan={5} className="py-8">
+                  <div className="flex justify-center">
+                    <LoadingBars message="Đang tải..." />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (

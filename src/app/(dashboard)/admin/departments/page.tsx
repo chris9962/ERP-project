@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import LoadingBars from "@/components/ui/loading-bars";
 
 type Department = {
   id: string;
@@ -195,8 +196,10 @@ export default function AdminDepartmentsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} className="py-8 text-center text-neutral-400">
-                  Đang tải...
+                <TableCell colSpan={4} className="py-8">
+                  <div className="flex justify-center">
+                    <LoadingBars message="Đang tải..." />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : departments.length === 0 ? (
