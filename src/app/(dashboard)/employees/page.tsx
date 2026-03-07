@@ -108,8 +108,8 @@ export default function EmployeesPage() {
       </HeaderActions>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative max-w-sm flex-1">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+        <div className="relative sm:max-w-sm sm:flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <Input
             placeholder="Tìm kiếm tên, mã NV..."
@@ -118,30 +118,32 @@ export default function EmployeesPage() {
             className="pl-9"
           />
         </div>
-        <Select value={filterDept} onValueChange={setFilterDept}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Phòng ban" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả phòng ban</SelectItem>
-            {departments.map((d) => (
-              <SelectItem key={d.id} value={d.name}>
-                {d.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Trạng thái" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả</SelectItem>
-            <SelectItem value="active">Đang làm</SelectItem>
-            <SelectItem value="inactive">Tạm nghỉ</SelectItem>
-            <SelectItem value="resigned">Đã nghỉ</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select value={filterDept} onValueChange={setFilterDept}>
+            <SelectTrigger className="flex-1 sm:w-[180px]">
+              <SelectValue placeholder="Phòng ban" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả phòng ban</SelectItem>
+              {departments.map((d) => (
+                <SelectItem key={d.id} value={d.name}>
+                  {d.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="flex-1 sm:w-[160px]">
+              <SelectValue placeholder="Trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="active">Đang làm</SelectItem>
+              <SelectItem value="inactive">Tạm nghỉ</SelectItem>
+              <SelectItem value="resigned">Đã nghỉ</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Table */}

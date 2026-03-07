@@ -143,36 +143,38 @@ export default function AttendanceReportPage() {
     <div className="space-y-6">
       <HeaderActions>
         <Button size="sm" onClick={fetchReport} disabled={loading}>
-          {loading ? "Đang tải..." : "Xem báo cáo"}
+          {loading ? "Đang tải..." : "Tải lại"}
         </Button>
       </HeaderActions>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-neutral-500">Từ ngày</label>
-          <Input
-            type="date"
-            value={fromDate}
-            onChange={(e) => handleFromDateChange(e.target.value)}
-            className="w-[170px]"
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-neutral-500">Đến ngày</label>
-          <Input
-            type="date"
-            value={toDate}
-            onChange={(e) => handleToDateChange(e.target.value)}
-            className="w-[170px]"
-          />
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="flex items-end gap-2">
+          <div className="space-y-1 flex-1 sm:flex-none">
+            <label className="text-xs font-medium text-neutral-500">Từ ngày</label>
+            <Input
+              type="date"
+              value={fromDate}
+              onChange={(e) => handleFromDateChange(e.target.value)}
+              className="w-full sm:w-[170px]"
+            />
+          </div>
+          <div className="space-y-1 flex-1 sm:flex-none">
+            <label className="text-xs font-medium text-neutral-500">Đến ngày</label>
+            <Input
+              type="date"
+              value={toDate}
+              onChange={(e) => handleToDateChange(e.target.value)}
+              className="w-full sm:w-[170px]"
+            />
+          </div>
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-neutral-500">
             Phòng ban
           </label>
           <Select value={filterDept} onValueChange={setFilterDept}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Tất cả" />
             </SelectTrigger>
             <SelectContent>
@@ -187,8 +189,7 @@ export default function AttendanceReportPage() {
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
@@ -200,7 +201,7 @@ export default function AttendanceReportPage() {
             <div className="text-2xl font-bold">{totalEmployees}</div>
           </CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
               Ngày công TB
@@ -210,7 +211,7 @@ export default function AttendanceReportPage() {
           <CardContent>
             <div className="text-2xl font-bold">{avgDays.toFixed(1)}</div>
           </CardContent>
-        </Card>
+        </Card> */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
