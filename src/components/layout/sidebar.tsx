@@ -9,76 +9,8 @@ import { useAuth } from "@/lib/auth-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import {
-  LayoutDashboard,
-  Activity,
-  Users,
-  CalendarCheck,
-  BarChart3,
-  Settings,
-  ChevronLeft,
-  DollarSign,
-  UserCog,
-  Building2,
-  X,
-} from "lucide-react";
-
-const navigation = [
-  {
-    name: "Trang chủ",
-    href: "/",
-    icon: LayoutDashboard,
-    roles: ["admin", "owner", "manager", "office_staff", "worker"],
-  },
-  {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: Activity,
-    roles: ["admin", "owner", "manager", "office_staff", "worker"],
-  },
-  {
-    name: "Nhân viên",
-    href: "/employees",
-    icon: Users,
-    roles: ["admin", "manager", "office_staff"],
-  },
-  {
-    name: "Điểm danh",
-    href: "/attendance",
-    icon: CalendarCheck,
-    roles: ["admin", "manager", "office_staff"],
-  },
-  // {
-  //   name: "Báo cáo lương",
-  //   href: "/reports/salary",
-  //   icon: DollarSign,
-  //   roles: ["admin", "owner"],
-  // },
-  // {
-  //   name: "Báo cáo điểm danh",
-  //   href: "/reports/attendance",
-  //   icon: BarChart3,
-  //   roles: ["admin", "owner"],
-  // },
-  {
-    name: "Quản lý User",
-    href: "/admin/users",
-    icon: UserCog,
-    roles: ["admin"],
-  },
-  {
-    name: "Phòng ban",
-    href: "/admin/departments",
-    icon: Building2,
-    roles: ["admin"],
-  },
-  // {
-  //   name: "Cấu hình lương",
-  //   href: "/admin/salary-config",
-  //   icon: Settings,
-  //   roles: ["admin"],
-  // },
-];
+import { ChevronLeft, LogOut, X } from "lucide-react";
+import { getSidebarPages } from "@/lib/navigation";
 
 type SidebarProps = {
   mobileOpen?: boolean;
@@ -89,9 +21,16 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { profile, roleName } = useAuth();
-  const filteredNav = navigation.filter(
-    (item) => roleName && item.roles.includes(roleName),
-  );
+  const filteredNav = getSidebarPages(roleName);
+
+  async function handleSignOut() {
+    try {
+      await fetch("/auth/signout", { method: "POST" });
+      window.location.href = "/login";
+    } catch {
+      window.location.href = "/login";
+    }
+  }
 
   const initials = profile?.full_name
     ? profile.full_name
@@ -162,9 +101,10 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
           {filteredNav.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(item.href + "/");
+            const label = item.sidebarLabel ?? item.name;
             return (
               <Link
-                key={item.name}
+                key={item.id}
                 href={item.href}
                 onClick={onCloseAction}
                 className={cn(
@@ -175,7 +115,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
                 )}
               >
                 <item.icon className="h-[18px] w-[18px] shrink-0" />
-                {(!collapsed || mobileOpen) && <span>{item.name}</span>}
+                {(!collapsed || mobileOpen) && <span>{label}</span>}
               </Link>
             );
           })}
@@ -184,8 +124,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
 
       <Separator />
 
-      {/* User */}
-      <div className="p-3">
+      <div className="space-y-1 p-3">
         <Link
           href="/profile"
           onClick={onCloseAction}
@@ -194,7 +133,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
             collapsed && !mobileOpen && "justify-center px-0",
           )}
         >
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback className="bg-neutral-200 text-xs font-medium text-neutral-700">
               {initials}
             </AvatarFallback>
@@ -208,6 +147,20 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
             </div>
           )}
         </Link>
+        <button
+          type="button"
+          onClick={() => {
+            onCloseAction?.();
+            handleSignOut();
+          }}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+            collapsed && !mobileOpen && "justify-center px-0",
+          )}
+        >
+          <LogOut className="h-[18px] w-[18px] shrink-0" />
+          {(!collapsed || mobileOpen) && <span>Đăng xuất</span>}
+        </button>
       </div>
     </aside>
   );

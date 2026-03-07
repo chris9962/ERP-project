@@ -125,12 +125,6 @@ export default function AdminDepartmentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Phòng ban</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Quản lý danh sách phòng ban
-          </p>
-        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreate}>

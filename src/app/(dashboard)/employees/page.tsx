@@ -97,15 +97,9 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Nhân viên</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Quản lý danh sách nhân viên
-          </p>
-        </div>
-        <Link href="/employees/new">
-          <Button>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <Link href="/employees/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Thêm nhân viên
           </Button>
@@ -154,8 +148,8 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Họ tên</TableHead>
-              <TableHead>Phòng ban</TableHead>
+              <TableHead className="min-w-[120px]">Họ tên</TableHead>
+              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
               <TableHead>Loại</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày vào làm</TableHead>

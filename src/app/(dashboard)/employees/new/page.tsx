@@ -122,14 +122,6 @@ export default function NewEmployeePage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Thêm nhân viên
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Thêm nhân viên mới vào hệ thống
-          </p>
-        </div>
       </div>
 
       <Card className="max-w-2xl">

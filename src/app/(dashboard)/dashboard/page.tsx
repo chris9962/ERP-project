@@ -68,13 +68,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Xin chào, {profile?.full_name || profile?.email || "User"}
-        </p>
-      </div>
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Link
           href={`/reports/attendance?from=${getTodayISO()}&to=${getTodayISO()}`}

@@ -140,15 +140,6 @@ export default function AttendanceReportPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Báo cáo điểm danh
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Thống kê điểm danh nhân viên theo kỳ
-        </p>
-      </div>
-
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
@@ -258,8 +249,8 @@ export default function AttendanceReportPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Họ tên</TableHead>
-              <TableHead>Phòng ban</TableHead>
+              <TableHead className="min-w-[120px]">Họ tên</TableHead>
+              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
               <TableHead className="text-right">Nửa ngày</TableHead>
               <TableHead className="text-right">Đủ ngày</TableHead>
               <TableHead className="text-right">Tăng ca</TableHead>

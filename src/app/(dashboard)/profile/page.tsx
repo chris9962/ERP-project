@@ -35,11 +35,6 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Thông tin cá nhân</h1>
-        <p className="mt-1 text-sm text-neutral-500">Xem và cập nhật thông tin của bạn</p>
-      </div>
-
       <Card className="max-w-lg">
         <CardHeader>
           <div className="flex items-center justify-between">

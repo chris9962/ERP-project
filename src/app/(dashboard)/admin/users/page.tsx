@@ -189,14 +189,6 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Quản lý User
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Quản lý tài khoản trong hệ thống
-          </p>
-        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreate}>
@@ -303,7 +295,7 @@ export default function AdminUsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Họ tên</TableHead>
+              <TableHead className="min-w-[120px]">Họ tên</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Trạng thái</TableHead>

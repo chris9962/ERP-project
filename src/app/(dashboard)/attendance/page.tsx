@@ -243,7 +243,7 @@ export default function AttendancePage() {
     fetchData();
   }
 
-  const totalAttended = Object.values(entries).filter((e) => e.value != null && e.value > 0).length;
+  // const totalAttended = Object.values(entries).filter((e) => e.value != null && e.value > 0).length;
   const countByValue = valueOptions.reduce(
     (acc, opt) => {
       acc[opt.value] = Object.values(entries).filter((e) => e.value === opt.value).length;
@@ -264,37 +264,87 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header: title + Lưu tất cả — responsive stack */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Điểm danh</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Điểm danh nhân viên theo ngày
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 w-full sm:w-auto shrink-0">
-          <Button
-            onClick={handleSaveAll}
-            disabled={saving || loading}
-            className="w-full sm:w-auto"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? "Đang lưu..." : "Lưu tất cả"}
-          </Button>
-          <Button
-            type="button"
-            variant="default"
-            className="w-full sm:w-auto bg-neutral-800 hover:bg-neutral-900"
-            onClick={() => setScannerOpen(true)}
-          >
-            <ScanLine className="mr-2 h-4 w-4" />
-            Quét CCCD
-          </Button>
-        </div>
+      <div className="sticky md:relative top-0 left-0 md:left-auto md:right-0 z-10 -mx-6 px-6 py-2 bg-neutral-50 flex gap-2 w-full md:w-fit">
+        <Button
+          onClick={handleSaveAll}
+          disabled={saving || loading}
+          className="flex-1 h-9 sm:h-10"
+          title={saving ? "Đang lưu..." : "Lưu tất cả"}
+        >
+          <Save className="h-4 w-4 sm:mr-2 shrink-0" />
+          <span>{saving ? "Đang lưu..." : "Lưu tất cả"}</span>
+        </Button>
+        <Button
+          type="button"
+          variant="default"
+          className="flex-1 h-9 sm:h-10 bg-neutral-800 hover:bg-neutral-900"
+          onClick={() => setScannerOpen(true)}
+          title="Quét CCCD"
+        >
+          <ScanLine className="h-4 w-4 sm:mr-2 shrink-0" />
+          <span>Quét CCCD</span>
+        </Button>
       </div>
 
-      {/* Filters — wrap, full width on mobile */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+      <div className="flex flex-col gap-3 sm:hidden">
+        <div className="flex items-end gap-3">
+          <div className="space-y-1 flex-1 min-w-0">
+            <label className="text-xs font-medium text-neutral-500">Ngày</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-1 flex-1 min-w-0">
+            <label className="text-xs font-medium text-neutral-500">Phòng ban</label>
+            <Select value={filterDept} onValueChange={setFilterDept}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Tất cả" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả phòng ban</SelectItem>
+                {departments.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex items-end gap-2">
+          <div className="space-y-1 flex-1 min-w-0">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <Input
+                type="text"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                placeholder="Tên nhân viên..."
+                className="h-10 pl-8"
+              />
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant={hideMarked ? "default" : "outline"}
+            size="sm"
+            onClick={() => setHideMarked((v) => !v)}
+            className="shrink-0 h-9 w-9 p-0"
+            title={hideMarked ? "Đang ẩn đã điểm danh" : "Ẩn người đã điểm danh"}
+          >
+            <EyeOff className="h-4 w-4" />
+          </Button>
+        </div>
+        {savedMsg && (
+          <span className={`text-sm ${savedMsg.includes("Lỗi") ? "text-red-500" : "text-emerald-600"}`}>
+            {savedMsg}
+          </span>
+        )}
+      </div>
+      <div className="hidden sm:flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="space-y-1 sm:min-w-0">
           <label className="text-xs font-medium text-neutral-500">Ngày</label>
           <Input
@@ -305,9 +355,7 @@ export default function AttendancePage() {
           />
         </div>
         <div className="space-y-1 sm:min-w-0">
-          <label className="text-xs font-medium text-neutral-500">
-            Phòng ban
-          </label>
+          <label className="text-xs font-medium text-neutral-500">Phòng ban</label>
           <Select value={filterDept} onValueChange={setFilterDept}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Tất cả" />
@@ -331,7 +379,7 @@ export default function AttendancePage() {
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               placeholder="Tên nhân viên..."
-              className="h-9 pl-8"
+              className="h-10 pl-8"
             />
           </div>
         </div>
@@ -347,23 +395,20 @@ export default function AttendancePage() {
         </Button>
         <div className="flex flex-wrap items-center gap-2 sm:pb-0.5">
           {savedMsg && (
-            <span
-              className={`text-sm ${savedMsg.includes("Lỗi") ? "text-red-500" : "text-emerald-600"}`}
-            >
+            <span className={`text-sm ${savedMsg.includes("Lỗi") ? "text-red-500" : "text-emerald-600"}`}>
               {savedMsg}
             </span>
           )}
         </div>
       </div>
 
-      {/* Desktop: table */}
       <div className="hidden md:block overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">STT</TableHead>
-              <TableHead>Họ tên</TableHead>
-              <TableHead>Phòng ban</TableHead>
+              <TableHead className="min-w-[120px]">Họ tên</TableHead>
+              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
               <TableHead className="w-[90px] text-center">Nửa ngày</TableHead>
               <TableHead className="w-[90px] text-center">Đủ ngày</TableHead>
               <TableHead className="w-[90px] text-center">Tăng ca</TableHead>
@@ -426,7 +471,6 @@ export default function AttendancePage() {
         </Table>
       </div>
 
-      {/* Mobile: card list */}
       <div className="md:hidden space-y-3">
         {loading ? (
           <div className="flex justify-center py-8">

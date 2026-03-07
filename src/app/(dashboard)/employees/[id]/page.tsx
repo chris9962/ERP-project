@@ -174,19 +174,6 @@ export default function EmployeeDetailPage() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {employee.full_name || employee.profiles?.full_name || "N/A"}
-            </h1>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge
-                variant="outline"
-                className={statusColors[employee.status] || ""}
-              >
-                {statusLabels[employee.status] || employee.status}
-              </Badge>
-            </div>
-          </div>
         </div>
         <div className="flex gap-2">
           <Link href={`/employees/${id}/salary`}>

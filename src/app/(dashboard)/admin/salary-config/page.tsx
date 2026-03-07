@@ -117,15 +117,6 @@ export default function SalaryConfigPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Cấu hình lương
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Cấu hình mức lương mặc định theo loại nhân viên
-        </p>
-      </div>
-
       <div className="rounded-lg border border-neutral-200 bg-white">
         <Table>
           <TableHeader>

@@ -129,14 +129,6 @@ export default function SalaryReportPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Báo cáo lương
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Thống kê lương nhân viên theo kỳ
-          </p>
-        </div>
         <Button variant="outline" onClick={exportCSV} disabled={rows.length === 0}>
           <Download className="mr-2 h-4 w-4" />
           Xuất CSV
@@ -230,8 +222,8 @@ export default function SalaryReportPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Họ tên</TableHead>
-              <TableHead>Phòng ban</TableHead>
+              <TableHead className="min-w-[120px]">Họ tên</TableHead>
+              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
               <TableHead className="text-right">Lương cơ bản</TableHead>
               <TableHead className="text-right">Ngày công</TableHead>
               <TableHead className="text-right">Tổng lương</TableHead>

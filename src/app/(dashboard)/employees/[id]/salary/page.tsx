@@ -147,14 +147,6 @@ export default function EmployeeSalaryPage() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Quản lý lương
-            </h1>
-            <p className="mt-1 text-sm text-neutral-500">
-              {employee?.full_name || "N/A"}
-            </p>
-          </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
