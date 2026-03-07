@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -23,6 +24,21 @@ type AuthContextType = {
   signOut: () => Promise<void>;
 };
 
+const AUTH_ME_KEY = ["auth", "me"] as const;
+
+async function fetchAuthMe(): Promise<{
+  user: User | null;
+  profile: Profile | null;
+}> {
+  const res = await fetch("/api/auth/me", { credentials: "include" });
+  if (!res.ok) return { user: null, profile: null };
+  const data = await res.json();
+  return {
+    user: data.user ?? null,
+    profile: data.profile ?? null,
+  };
+}
+
 const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
@@ -32,65 +48,40 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data, isPending, isFetching, refetch } = useQuery({
+    queryKey: AUTH_ME_KEY,
+    queryFn: fetchAuthMe,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const user = data?.user ?? null;
+  const profile = data?.profile ?? null;
+  const roleName = (profile?.roles as { name: string } | null)?.name ?? null;
+  const loading = isPending || isFetching;
 
   useEffect(() => {
     const supabase = createClient();
-
-    async function getSession() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        setUser(user);
-        const { data } = await supabase
-          .from("profiles")
-          .select("*, roles(name)")
-          .eq("id", user.id)
-          .single();
-        setProfile(data);
-      }
-      setLoading(false);
-    }
-
-    getSession();
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*, roles(name)")
-          .eq("id", currentUser.id)
-          .single();
-        setProfile(data);
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
+    } = supabase.auth.onAuthStateChange(async (_event, _session) => {
+      await queryClient.invalidateQueries({ queryKey: AUTH_ME_KEY });
     });
-
     return () => subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   async function signOut() {
     const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
+    await supabase.auth.signOut({ scope: "local" });
+    queryClient.setQueryData(AUTH_ME_KEY, { user: null, profile: null });
   }
 
-  const roleName = (profile?.roles as { name: string } | null)?.name ?? null;
-
   return (
-    <AuthContext.Provider value={{ user, profile, roleName, loading, signOut }}>
+    <AuthContext.Provider
+      value={{ user, profile, roleName, loading, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

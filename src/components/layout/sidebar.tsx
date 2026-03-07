@@ -75,18 +75,17 @@ export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { profile, roleName } = useAuth();
-
   const filteredNav = navigation.filter(
     (item) => roleName && item.roles.includes(roleName),
   );
 
   const initials = profile?.full_name
     ? profile.full_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
     : "U";
 
   return (

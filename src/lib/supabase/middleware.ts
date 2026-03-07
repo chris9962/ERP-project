@@ -54,7 +54,6 @@ export async function updateSession(request: NextRequest) {
     .select("role_id, roles(name)")
     .eq("id", user.id)
     .single();
-
   const roleName = (profile?.roles as unknown as { name: string } | null)?.name;
 
   // Role-based access control

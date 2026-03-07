@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,14 +19,13 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     setMessage("");
-
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("profiles")
-      .update({ full_name: fullName, phone })
-      .eq("id", profile?.id);
-
-    if (error) {
+    const res = await fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name: fullName, phone }),
+      credentials: "include",
+    });
+    if (!res.ok) {
       setMessage("Loi khi cap nhat thong tin");
     } else {
       setMessage("Cap nhat thanh cong");

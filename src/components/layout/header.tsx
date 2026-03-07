@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -9,22 +8,24 @@ import { Separator } from "@/components/ui/separator";
 import { LogOut } from "lucide-react";
 
 export function Header() {
-  const { profile, roleName, signOut } = useAuth();
-  const router = useRouter();
+  const { profile, roleName } = useAuth();
 
   async function handleSignOut() {
-    await signOut();
-    router.push("/login");
-    router.refresh();
+    try {
+      await fetch("/auth/signout", { method: "POST" });
+      window.location.href = "/login";
+    } catch {
+      window.location.href = "/login";
+    }
   }
 
   const initials = profile?.full_name
     ? profile.full_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
     : "U";
 
   return (

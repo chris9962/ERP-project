@@ -1,0 +1,37 @@
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const supabase = await createClient();
+  const [empRes, deptRes, salRes, attRes] = await Promise.all([
+    supabase
+      .from("employees")
+      .select("*, departments(name), profiles(full_name, email)")
+      .eq("id", id)
+      .single(),
+    supabase.from("departments").select("id, name").order("name"),
+    supabase
+      .from("salary_history")
+      .select("*")
+      .eq("employee_id", id)
+      .order("effective_date", { ascending: false }),
+    supabase
+      .from("attendance")
+      .select("*")
+      .eq("employee_id", id)
+      .order("date", { ascending: false })
+      .limit(30),
+  ]);
+  if (empRes.error)
+    return NextResponse.json({ error: empRes.error.message }, { status: 500 });
+  return NextResponse.json({
+    employee: empRes.data,
+    departments: deptRes.data ?? [],
+    salaryHistory: salRes.data ?? [],
+    attendance: attRes.data ?? [],
+  });
+}
