@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Header } from "@/components/layout/header";
+import { AuthProvider } from "@/lib/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ERP System - Quan ly Doanh nghiep",
-  description: "He thong quan ly nhan su, kho hang va ban hang",
+  description: "He thong quan ly nhan su va cham cong",
 };
 
 export default function RootLayout({
@@ -27,13 +26,7 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <Header />
-            <main className="flex-1 overflow-auto bg-neutral-50 p-6">{children}</main>
-          </div>
-        </div>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

@@ -1,0 +1,22 @@
+{
+  "enabledMcpjsonServers": [
+    "supabase"
+  ],
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "NotebookEdit(*)",
+      "TodoWrite(*)",
+      "mcp__supabase__*"
+    ],
+    "deny": []
+  }
+}
