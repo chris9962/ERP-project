@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Download, DollarSign, Users, TrendingUp } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Department = { id: string; name: string };
 
@@ -128,12 +129,15 @@ export default function SalaryReportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={exportCSV} disabled={rows.length === 0}>
+      <HeaderActions>
+        <Button size="sm" onClick={fetchReport} disabled={loading}>
+          {loading ? "Đang tải..." : "Xem báo cáo"}
+        </Button>
+        <Button size="sm" variant="outline" onClick={exportCSV} disabled={rows.length === 0}>
           <Download className="mr-2 h-4 w-4" />
           Xuất CSV
         </Button>
-      </div>
+      </HeaderActions>
 
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
@@ -173,9 +177,6 @@ export default function SalaryReportPage() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={fetchReport} disabled={loading}>
-          {loading ? "Đang tải..." : "Xem báo cáo"}
-        </Button>
       </div>
 
       {/* Summary cards */}

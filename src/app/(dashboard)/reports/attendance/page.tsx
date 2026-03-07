@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Users, AlertTriangle, TrendingUp } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Department = { id: string; name: string };
 
@@ -140,6 +141,12 @@ export default function AttendanceReportPage() {
 
   return (
     <div className="space-y-6">
+      <HeaderActions>
+        <Button size="sm" onClick={fetchReport} disabled={loading}>
+          {loading ? "Đang tải..." : "Xem báo cáo"}
+        </Button>
+      </HeaderActions>
+
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
@@ -178,9 +185,6 @@ export default function AttendanceReportPage() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={fetchReport} disabled={loading}>
-          {loading ? "Đang tải..." : "Xem báo cáo"}
-        </Button>
       </div>
 
       {/* Summary cards */}

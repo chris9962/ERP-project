@@ -16,6 +16,7 @@ import {
 import { ArrowLeft, ScanLine } from "lucide-react";
 import Link from "next/link";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Department = { id: string; name: string };
 
@@ -116,6 +117,17 @@ export default function NewEmployeePage() {
 
   return (
     <div className="space-y-6">
+      <HeaderActions>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => setScannerOpen(true)}
+        >
+          <ScanLine className="mr-2 h-4 w-4" />
+          Quét CCCD
+        </Button>
+      </HeaderActions>
+
       <div className="flex items-center gap-4">
         <Link href="/employees">
           <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -126,19 +138,6 @@ export default function NewEmployeePage() {
 
       <Card className="max-w-2xl">
         <CardContent className="pt-6">
-          <div className="mb-5 flex flex-wrap items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setScannerOpen(true)}
-            >
-              <ScanLine className="mr-2 h-4 w-4" />
-              Quét CCCD
-            </Button>
-            <span className="text-sm text-neutral-500">
-              Quét mã QR trên CCCD để điền sẵn Họ tên và Số CCCD
-            </span>
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">

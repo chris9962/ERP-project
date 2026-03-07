@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 export default function ProfilePage() {
   const { profile, roleName } = useAuth();
@@ -15,8 +16,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
+  async function doSave() {
     setSaving(true);
     setMessage("");
     const res = await fetch("/api/profile", {
@@ -33,8 +33,19 @@ export default function ProfilePage() {
     setSaving(false);
   }
 
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    doSave();
+  }
+
   return (
     <div className="space-y-6">
+      <HeaderActions>
+        <Button size="sm" onClick={doSave} disabled={saving}>
+          {saving ? "Đang lưu..." : "Lưu thay đổi"}
+        </Button>
+      </HeaderActions>
+
       <Card className="max-w-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -74,9 +85,6 @@ export default function ProfilePage() {
                 {message}
               </p>
             )}
-            <Button type="submit" disabled={saving}>
-              {saving ? "Đang lưu..." : "Lưu thay đổi"}
-            </Button>
           </form>
         </CardContent>
       </Card>

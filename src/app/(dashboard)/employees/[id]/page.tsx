@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
 import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Department = { id: string; name: string };
 type Employee = {
@@ -167,37 +168,36 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/employees">
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <ArrowLeft className="h-4 w-4" />
+      <HeaderActions>
+        <Link href={`/employees/${id}/salary`}>
+          <Button size="sm" variant="outline">
+            <DollarSign className="h-4 w-4" />
+            <span className="hidden ml-2 md:block">Quản lý lương</span>
+          </Button>
+        </Link>
+        {!editing ? (
+          <Button size="sm" onClick={() => setEditing(true)}>
+            <Pencil className="h-4 w-4" />
+            <span className="hidden ml-2 md:block">Chỉnh sửa</span>
+          </Button>
+        ) : (
+          <>
+            <Button size="sm" variant="outline" onClick={() => setEditing(false)}>
+              Hủy
             </Button>
-          </Link>
-        </div>
-        <div className="flex gap-2">
-          <Link href={`/employees/${id}/salary`}>
-            <Button variant="outline">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Quản lý lương
+            <Button size="sm" onClick={handleSave} disabled={saving}>
+              {saving ? "Đang lưu..." : "Lưu"}
             </Button>
-          </Link>
-          {!editing ? (
-            <Button onClick={() => setEditing(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Chỉnh sửa
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setEditing(false)}>
-                Hủy
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Đang lưu..." : "Lưu"}
-              </Button>
-            </div>
-          )}
-        </div>
+          </>
+        )}
+      </HeaderActions>
+
+      <div className="flex items-center gap-4">
+        <Link href="/employees">
+          <Button variant="ghost" size="icon" className="h-9 w-9">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
       </div>
 
       <Tabs defaultValue="info">
@@ -306,8 +306,8 @@ export default function EmployeeDetailPage() {
                   <p className="text-sm">
                     {employee.start_date
                       ? new Date(employee.start_date).toLocaleDateString(
-                          "vi-VN",
-                        )
+                        "vi-VN",
+                      )
                       : "—"}
                   </p>
                 </div>

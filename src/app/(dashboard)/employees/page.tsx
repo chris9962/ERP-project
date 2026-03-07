@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Search, Eye } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Employee = {
   id: string;
@@ -97,14 +98,14 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Link href="/employees/new" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto">
+      <HeaderActions>
+        <Link href="/employees/new">
+          <Button size="sm">
             <Plus className="mr-2 h-4 w-4" />
             Thêm nhân viên
           </Button>
         </Link>
-      </div>
+      </HeaderActions>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">

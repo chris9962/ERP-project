@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -25,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
 import { ArrowLeft, Plus } from "lucide-react";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Employee = {
   id: string;
@@ -140,21 +140,22 @@ export default function EmployeeSalaryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href={`/employees/${employeeId}`}>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Cập nhật lương
-            </Button>
-          </DialogTrigger>
+      <HeaderActions>
+        <Button size="sm" onClick={() => setDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Cập nhật lương
+        </Button>
+      </HeaderActions>
+
+      <div className="flex items-center gap-4">
+        <Link href={`/employees/${employeeId}`}>
+          <Button variant="ghost" size="icon" className="h-9 w-9">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+      </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Cập nhật mức lương</DialogTitle>
@@ -207,8 +208,7 @@ export default function EmployeeSalaryPage() {
               </div>
             </form>
           </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
 
       {/* Current salary */}
       {currentSalary && (

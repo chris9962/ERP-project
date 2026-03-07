@@ -20,9 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save, CalendarCheck, Search, EyeOff, ScanLine } from "lucide-react";
+import { Save, Search, EyeOff, ScanLine } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
+import { HeaderActions } from "@/components/layout/header-actions";
 import {
   Dialog,
   DialogContent,
@@ -264,27 +265,24 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="sticky md:relative top-0 left-0 md:left-auto md:right-0 z-10 -mx-6 px-6 py-2 bg-neutral-50 flex gap-2 w-full md:w-fit">
+      <HeaderActions>
         <Button
+          size="sm"
           onClick={handleSaveAll}
           disabled={saving || loading}
-          className="flex-1 h-9 sm:h-10"
-          title={saving ? "Đang lưu..." : "Lưu tất cả"}
         >
-          <Save className="h-4 w-4 sm:mr-2 shrink-0" />
-          <span>{saving ? "Đang lưu..." : "Lưu tất cả"}</span>
+          <Save size="sm" className="h-4 w-4" />
+          <span className="hidden ml-2 md:block">{saving ? "Đang lưu..." : "Lưu tất cả"}</span>
         </Button>
         <Button
-          type="button"
-          variant="default"
-          className="flex-1 h-9 sm:h-10 bg-neutral-800 hover:bg-neutral-900"
+          size="sm"
+          variant="secondary"
           onClick={() => setScannerOpen(true)}
-          title="Quét CCCD"
         >
-          <ScanLine className="h-4 w-4 sm:mr-2 shrink-0" />
-          <span>Quét CCCD</span>
+          <ScanLine size="sm" className="h-4 w-4" />
+          <span className="hidden ml-2 md:block">Quét CCCD</span>
         </Button>
-      </div>
+      </HeaderActions>
 
       <div className="flex flex-col gap-3 sm:hidden">
         <div className="flex items-end gap-3">

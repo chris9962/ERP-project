@@ -19,7 +19,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import LoadingBars from "@/components/ui/loading-bars";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Role = { id: string; name: string; description: string | null };
 type UserProfile = {
@@ -188,14 +188,14 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Thêm user
-            </Button>
-          </DialogTrigger>
+      <HeaderActions>
+        <Button size="sm" onClick={openCreate}>
+          <Plus className="mr-2 h-4 w-4" />
+          Thêm user
+        </Button>
+      </HeaderActions>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -276,8 +276,7 @@ export default function AdminUsersPage() {
               </div>
             </form>
           </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
 
       {/* Search */}
       <div className="relative max-w-sm">

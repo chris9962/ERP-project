@@ -18,10 +18,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
+import { HeaderActions } from "@/components/layout/header-actions";
 
 type Department = {
   id: string;
@@ -124,14 +124,14 @@ export default function AdminDepartmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Thêm phòng ban
-            </Button>
-          </DialogTrigger>
+      <HeaderActions>
+        <Button size="sm" onClick={openCreate}>
+          <Plus className="mr-2 h-4 w-4" />
+          Thêm phòng ban
+        </Button>
+      </HeaderActions>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -174,8 +174,7 @@ export default function AdminDepartmentsPage() {
               </div>
             </form>
           </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
 
       <div className="rounded-lg border border-neutral-200 bg-white">
         <Table>
