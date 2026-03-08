@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -25,12 +24,7 @@ import LoadingBars from "@/components/ui/loading-bars";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 import { HeaderActions } from "@/components/layout/header-actions";
 import { getRoleLabel } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { AttendanceQRModal } from "@/components/attendance-qr-modal";
 
 type Employee = {
   id: string;
@@ -70,6 +64,7 @@ export default function AttendancePage() {
   const [scanResultModalOpen, setScanResultModalOpen] = useState(false);
   const [scanResultEmployee, setScanResultEmployee] = useState<Employee | null>(null);
   const [scanResultValue, setScanResultValue] = useState<number | null>(null);
+  const [scanResultExisting, setScanResultExisting] = useState<{ value: number; note: string } | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -176,34 +171,24 @@ export default function AttendancePage() {
     { value: 0, label: "Vắng" },
   ];
 
-  function normalizeName(s: string) {
-    return (s || "").trim().toLowerCase().replace(/\s+/g, " ");
-  }
-
   function handleQrScanResult(data: { fullName: string; cccdNumber: string | null }) {
     setScannerOpen(false);
-    const byCccd =
-      data.cccdNumber?.trim() &&
-      employees.find(
-        (e) => (e.cccd_number || "").trim() === data.cccdNumber?.trim(),
-      );
-    if (byCccd) {
-      setScanResultEmployee(byCccd);
-      setScanResultValue(entries[byCccd.id]?.value ?? null);
-      setScanResultModalOpen(true);
+    if (!data.cccdNumber?.trim()) {
+      setSavedMsg("Không đọc được số CCCD từ mã QR");
       return;
     }
-    const name = normalizeName(data.fullName);
-    const byName = employees.find(
-      (e) => normalizeName(e.full_name || "") === name || normalizeName(e.full_name || "").includes(name) || name.includes(normalizeName(e.full_name || "")),
+    const found = employees.find(
+      (e) => (e.cccd_number || "").trim() === data.cccdNumber!.trim(),
     );
-    if (byName) {
-      setScanResultEmployee(byName);
-      setScanResultValue(entries[byName.id]?.value ?? null);
+    if (found) {
+      const entry = entries[found.id];
+      setScanResultEmployee(found);
+      setScanResultValue(entry?.value ?? null);
+      setScanResultExisting(entry?.value != null ? { value: entry.value, note: entry.note || "" } : null);
       setScanResultModalOpen(true);
-      return;
+    } else {
+      setSavedMsg("Không tìm thấy nhân viên với CCCD: " + data.cccdNumber);
     }
-    setSavedMsg("Không tìm thấy nhân viên: " + data.fullName);
   }
 
   async function confirmScanResult() {
@@ -530,47 +515,16 @@ export default function AttendancePage() {
         onScanAction={handleQrScanResult}
       />
 
-      <Dialog open={scanResultModalOpen} onOpenChange={setScanResultModalOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Điểm danh (quét CCCD)</DialogTitle>
-          </DialogHeader>
-          {scanResultEmployee && (
-            <div className="space-y-4">
-              <p className="text-sm text-neutral-600">
-                <span className="font-medium">{scanResultEmployee.full_name || "—"}</span>
-                {scanResultEmployee.departments?.name && (
-                  <span className="text-neutral-500"> · {scanResultEmployee.departments.name}</span>
-                )}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {valueOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex cursor-pointer items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm has-[:checked]:border-neutral-900 has-[:checked]:bg-neutral-100"
-                  >
-                    <input
-                      type="radio"
-                      name="scan-result-value"
-                      checked={scanResultValue != null && Number(scanResultValue) === opt.value}
-                      onChange={() => setScanResultValue(opt.value)}
-                      className="h-4 w-4 accent-neutral-900"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-              <Button
-                className="w-full"
-                disabled={scanResultValue == null || saving}
-                onClick={confirmScanResult}
-              >
-                {saving ? "Đang lưu..." : "Xác nhận điểm danh"}
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <AttendanceQRModal
+        open={scanResultModalOpen}
+        onOpenChange={setScanResultModalOpen}
+        employee={scanResultEmployee}
+        existingAttendance={scanResultExisting}
+        selectedValue={scanResultValue}
+        onValueChange={setScanResultValue}
+        onConfirm={confirmScanResult}
+        saving={saving}
+      />
     </div>
   );
 }

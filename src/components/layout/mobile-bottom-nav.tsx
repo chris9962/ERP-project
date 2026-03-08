@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { getRouteRoles } from "@/lib/navigation";
+import { AttendanceQRModal } from "@/components/attendance-qr-modal";
 
 type FoundEmployee = {
   id: string;
@@ -223,65 +224,16 @@ export function MobileBottomNav() {
         </div>
       )}
 
-      {/* Attendance modal */}
-      <Dialog open={attendanceModalOpen} onOpenChange={setAttendanceModalOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Điểm danh hôm nay</DialogTitle>
-          </DialogHeader>
-          {foundEmployee && (
-            <div className="space-y-4">
-              <div className="rounded-lg bg-neutral-50 p-3">
-                <p className="font-medium text-neutral-900">
-                  {foundEmployee.full_name || "—"}
-                </p>
-                <p className="text-sm text-neutral-500">
-                  {foundEmployee.employee_code}
-                  {foundEmployee.departments?.name &&
-                    ` · ${foundEmployee.departments.name}`}
-                </p>
-              </div>
-              {existingAttendance && (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                  <p className="text-sm font-medium text-emerald-700">
-                    Đã điểm danh: {VALUE_OPTIONS.find((o) => o.value === Number(existingAttendance.value))?.label || existingAttendance.value}
-                  </p>
-                  {existingAttendance.note && (
-                    <p className="mt-0.5 text-xs text-emerald-600">{existingAttendance.note}</p>
-                  )}
-                </div>
-              )}
-              <p className="text-xs text-neutral-500">
-                {existingAttendance ? "Chọn lại để cập nhật:" : "Chọn loại điểm danh:"}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {VALUE_OPTIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex cursor-pointer items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm has-[:checked]:border-neutral-900 has-[:checked]:bg-neutral-100"
-                  >
-                    <input
-                      type="radio"
-                      name="bottom-nav-attendance"
-                      checked={attendanceValue === opt.value}
-                      onChange={() => setAttendanceValue(opt.value)}
-                      className="h-4 w-4 accent-neutral-900"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-              <Button
-                className="w-full"
-                disabled={attendanceValue == null || saving}
-                onClick={handleConfirmAttendance}
-              >
-                {saving ? "Đang lưu..." : existingAttendance ? "Cập nhật điểm danh" : "Xác nhận điểm danh"}
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <AttendanceQRModal
+        open={attendanceModalOpen}
+        onOpenChange={setAttendanceModalOpen}
+        employee={foundEmployee}
+        existingAttendance={existingAttendance}
+        selectedValue={attendanceValue}
+        onValueChange={setAttendanceValue}
+        onConfirm={handleConfirmAttendance}
+        saving={saving}
+      />
 
       {/* Not found modal */}
       <Dialog open={notFoundModalOpen} onOpenChange={setNotFoundModalOpen}>
