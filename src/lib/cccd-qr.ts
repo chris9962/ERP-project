@@ -106,8 +106,8 @@ export function parseCCCDFromQR(raw: string): CCCDQRData | null {
     }
   }
 
-  // Fallback: coi toàn bộ là tên (một số QR chỉ có tên)
-  if (t.length >= 2 && t.length <= 100) {
+  // Fallback: trả về raw string (không giới hạn độ dài)
+  if (t.length >= 2) {
     return {
       fullName: t,
       cccdNumber: null,
