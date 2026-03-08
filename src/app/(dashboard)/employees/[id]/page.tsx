@@ -192,6 +192,10 @@ export default function EmployeeDetailPage() {
             <CardContent className="pt-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
+                  <Label>Mã nhân viên</Label>
+                  <p className="text-sm font-mono">{employee.employee_code || "—"}</p>
+                </div>
+                <div className="space-y-2">
                   <Label>Họ và tên</Label>
                   {editing ? (
                     <Input

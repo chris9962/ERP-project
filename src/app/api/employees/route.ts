@@ -26,13 +26,27 @@ export async function POST(request: Request) {
     salary_amount,
   } = body;
 
+  // Auto-generate employee_code: NV000001, NV000002, ...
+  let code = employee_code;
+  if (!code) {
+    const { data: latest } = await supabase
+      .from("employees")
+      .select("employee_code")
+      .like("employee_code", "NV%")
+      .order("employee_code", { ascending: false })
+      .limit(1)
+      .single();
+    const lastNum = latest?.employee_code ? parseInt(latest.employee_code.replace("NV", "")) || 0 : 0;
+    code = `NV${String(lastNum + 1).padStart(6, "0")}`;
+  }
+
   const { data: employee, error: empError } = await supabase
     .from("employees")
     .insert({
       profile_id,
       full_name: full_name ?? "",
       cccd_number: cccd_number || null,
-      employee_code: employee_code || null,
+      employee_code: code,
       department_id: department_id || null,
       employment_type: employment_type ?? "full_time",
       start_date: start_date || null,
