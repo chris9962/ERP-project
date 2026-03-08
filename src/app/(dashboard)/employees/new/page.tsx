@@ -153,107 +153,108 @@ export default function NewEmployeePage() {
               </div>
             </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Phòng ban</Label>
-                    <Select value={departmentId} onValueChange={setDepartmentId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn phòng ban" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {departments.map((d) => (
-                          <SelectItem key={d.id} value={d.id}>
-                            {d.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Phòng ban</Label>
+                <Select value={departmentId} onValueChange={setDepartmentId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn phòng ban" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Loại nhân viên</Label>
+                <Select
+                  value={employmentType}
+                  onValueChange={setEmploymentType}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_time">Toàn thời gian</SelectItem>
+                    <SelectItem value="part_time">Bán thời gian</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Loại nhân viên</Label>
-                    <Select
-                      value={employmentType}
-                      onValueChange={setEmploymentType}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="full_time">Toàn thời gian</SelectItem>
-                        <SelectItem value="part_time">Bán thời gian</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Ngày vào làm</Label>
-                    <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
-                  </div>
-                </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Ngày vào làm</Label>
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Vai trò</Label>
+                <Select value={roleName} onValueChange={setRoleName}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="worker">Công nhân</SelectItem>
+                    <SelectItem value="office_staff">Văn phòng</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Vai trò</Label>
-                    <Select value={roleName} onValueChange={setRoleName}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="worker">Công nhân</SelectItem>
-                        <SelectItem value="office_staff">Văn phòng</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            <div className="border-t border-neutral-200 pt-5">
+              <p className="mb-3 text-sm font-medium text-neutral-700">
+                Tài khoản đăng nhập
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Email *</Label>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="email@company.com"
+                    required
+                  />
                 </div>
+                <div className="space-y-2">
+                  <Label>Mật khẩu *</Label>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Tối thiểu 6 ký tự"
+                    required
+                    minLength={6}
+                  />
+                </div>
+              </div>
+            </div>
 
-                <div className="border-t border-neutral-200 pt-5">
-                  <p className="mb-3 text-sm font-medium text-neutral-700">
-                    Tài khoản đăng nhập
-                  </p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Email *</Label>
-                      <Input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="email@company.com"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Mật khẩu *</Label>
-                      <Input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Tối thiểu 6 ký tự"
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-neutral-200 pt-5">
-                  <div className="max-w-sm space-y-2">
-                    <Label>Mức lương ban đầu (VND)</Label>
-                    <Input
-                      type="number"
-                      value={salaryAmount}
-                      onChange={(e) => setSalaryAmount(e.target.value)}
-                      placeholder="10000000"
-                      min="0"
-                      step="100000"
-                    />
-                  </div>
-                </div>
+            <div className="border-t border-neutral-200 pt-5">
+              <div className="max-w-sm space-y-2">
+                <Label>
+                  {employmentType === "part_time"
+                    ? "Mức lương ban đầu theo ca (VND)"
+                    : "Mức lương ban đầu theo tháng (VND)"}
+                </Label>
+                <Input
+                  type="number"
+                  value={salaryAmount}
+                  onChange={(e) => setSalaryAmount(e.target.value)}
+                  placeholder="10000000"
+                  min="0"
+                  step="100000"
+                />
+              </div>
+            </div>
 
             <div className="flex gap-3">
               <Button type="submit" disabled={loading}>
