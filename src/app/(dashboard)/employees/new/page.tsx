@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,12 +23,13 @@ type Department = { id: string; name: string };
 
 export default function NewEmployeePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Form
-  const [fullName, setFullName] = useState("");
-  const [cccdNumber, setCccdNumber] = useState("");
+  // Form - pre-fill from URL params (from QR scan navigation)
+  const [fullName, setFullName] = useState(searchParams.get("fullName") || "");
+  const [cccdNumber, setCccdNumber] = useState(searchParams.get("cccd") || "");
   const [employeeCode, setEmployeeCode] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [employmentType, setEmploymentType] = useState("full_time");

@@ -20,10 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Eye } from "lucide-react";
+import { Plus, Search, Eye, Pencil } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
 import { getRoleLabel } from "@/lib/utils";
+import QuickEditModal from "@/components/employees/quick-edit-modal";
 
 type Employee = {
   id: string;
@@ -45,6 +46,10 @@ export default function EmployeesPage() {
   const [filterDept, setFilterDept] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  // Quick edit modal
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+
   const fetchData = useCallback(async () => {
     const res = await fetch("/api/employees", { credentials: "include" });
     if (res.ok) {
@@ -57,6 +62,11 @@ export default function EmployeesPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  function openEdit(id: string) {
+    setEditId(id);
+    setEditOpen(true);
+  }
 
   const statusColors: Record<string, string> = {
     active: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -153,7 +163,7 @@ export default function EmployeesPage() {
               <TableHead className="text-right">Lương</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày vào làm</TableHead>
-              <TableHead className="w-[60px]" />
+              <TableHead className="w-[100px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -204,11 +214,21 @@ export default function EmployeesPage() {
                       : "—"}
                   </TableCell>
                   <TableCell>
-                    <Link href={`/employees/${emp.id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Eye className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => openEdit(emp.id)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                    </Link>
+                      <Link href={`/employees/${emp.id}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -216,6 +236,13 @@ export default function EmployeesPage() {
           </TableBody>
         </Table>
       </div>
+
+      <QuickEditModal
+        employeeId={editId}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={fetchData}
+      />
     </div>
   );
 }
