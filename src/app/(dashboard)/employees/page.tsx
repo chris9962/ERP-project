@@ -34,7 +34,7 @@ type Employee = {
   start_date: string | null;
   departments: { name: string } | null;
   profiles: { full_name: string | null; email: string | null; roles: { name: string } | null } | null;
-  current_salary: number | null;
+  salary_amount: number | null;
 };
 
 
@@ -186,8 +186,8 @@ export default function EmployeesPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right text-neutral-600">
-                    {emp.current_salary
-                      ? formatCurrency(emp.current_salary)
+                    {emp.salary_amount
+                      ? `${formatCurrency(emp.salary_amount)}/${emp.employment_type === "part_time" ? "Ca" : "Tháng"}`
                       : "—"}
                   </TableCell>
                   <TableCell>

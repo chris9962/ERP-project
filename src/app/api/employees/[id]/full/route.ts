@@ -7,18 +7,13 @@ export async function GET(
 ) {
   const { id } = await params;
   const supabase = await createClient();
-  const [empRes, deptRes, salRes, attRes] = await Promise.all([
+  const [empRes, deptRes, attRes] = await Promise.all([
     supabase
       .from("employees")
       .select("*, departments(name), profiles(full_name, email, role_id, roles(name))")
       .eq("id", id)
       .single(),
     supabase.from("departments").select("id, name").order("name"),
-    supabase
-      .from("salary_history")
-      .select("*")
-      .eq("employee_id", id)
-      .order("effective_date", { ascending: false }),
     supabase
       .from("attendance")
       .select("*")
@@ -31,7 +26,6 @@ export async function GET(
   return NextResponse.json({
     employee: empRes.data,
     departments: deptRes.data ?? [],
-    salaryHistory: salRes.data ?? [],
     attendance: attRes.data ?? [],
   });
 }

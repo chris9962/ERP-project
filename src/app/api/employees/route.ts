@@ -5,21 +5,10 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("employees")
-    .select("*, departments(name), profiles(full_name, email, roles(name)), salary_history(salary_amount, effective_date, end_date)")
+    .select("*, departments(name), profiles(full_name, email, roles(name))")
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  const result = (data ?? []).map((emp) => {
-    const currentSalary = (emp.salary_history as { salary_amount: number; effective_date: string; end_date: string | null }[] | null)
-      ?.filter((s) => !s.end_date)
-      ?.sort((a, b) => b.effective_date.localeCompare(a.effective_date))[0] ?? null;
-    return {
-      ...emp,
-      current_salary: currentSalary?.salary_amount ?? null,
-    };
-  });
-
-  return NextResponse.json(result);
+  return NextResponse.json(data ?? []);
 }
 
 export async function POST(request: Request) {
@@ -35,7 +24,6 @@ export async function POST(request: Request) {
     start_date,
     status,
     salary_amount,
-    salary_reason,
   } = body;
 
   const { data: employee, error: empError } = await supabase
@@ -49,22 +37,13 @@ export async function POST(request: Request) {
       employment_type: employment_type ?? "full_time",
       start_date: start_date || null,
       status: status ?? "active",
+      salary_amount: salary_amount ? parseFloat(salary_amount) : 0,
     })
     .select()
     .single();
 
   if (empError)
     return NextResponse.json({ error: empError.message }, { status: 500 });
-
-  if (salary_amount && employee) {
-    await supabase.from("salary_history").insert({
-      employee_id: employee.id,
-      salary_amount: parseFloat(salary_amount),
-      effective_date: start_date || new Date().toISOString().split("T")[0],
-      reason: salary_reason || "Luong khoi diem",
-      created_by: null,
-    });
-  }
 
   return NextResponse.json(employee);
 }

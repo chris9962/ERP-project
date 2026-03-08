@@ -92,8 +92,7 @@ export default function NewEmployeePage() {
         employment_type: employmentType,
         start_date: startDate,
         status: "active",
-        salary_amount: salaryAmount || null,
-        salary_reason: "Lương khởi điểm",
+        salary_amount: salaryAmount || 0,
       }),
       credentials: "include",
     });
