@@ -242,8 +242,8 @@ export default function NewEmployeePage() {
               <div className="max-w-sm space-y-2">
                 <Label>
                   {employmentType === "part_time"
-                    ? "Mức lương ban đầu theo ca (VND)"
-                    : "Mức lương ban đầu theo tháng (VND)"}
+                    ? "Mức lương ban đầu theo ca (VND) *"
+                    : "Mức lương ban đầu theo tháng (VND) *"}
                 </Label>
                 <Input
                   type="number"
@@ -251,7 +251,8 @@ export default function NewEmployeePage() {
                   onChange={(e) => setSalaryAmount(e.target.value)}
                   placeholder="10000000"
                   min="0"
-                  step="100000"
+                  step="1000"
+                  required
                 />
               </div>
             </div>

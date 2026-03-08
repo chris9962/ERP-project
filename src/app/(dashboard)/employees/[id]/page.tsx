@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,8 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import LoadingBars from "@/components/ui/loading-bars";
-import { DollarSign, Pencil } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
 import { getRoleLabel } from "@/lib/utils";
 
@@ -69,6 +75,16 @@ export default function EmployeeDetailPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Salary dialog
+  const [salaryDialogOpen, setSalaryDialogOpen] = useState(false);
+  const [salaryAmount, setSalaryAmount] = useState("");
+  const [salaryDate, setSalaryDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [salaryReason, setSalaryReason] = useState("");
+  const [salaryError, setSalaryError] = useState("");
+  const [salaryLoading, setSalaryLoading] = useState(false);
 
   // Edit form
   const [formName, setFormName] = useState("");
@@ -125,6 +141,52 @@ export default function EmployeeDetailPage() {
     if (res.ok) fetchFull();
   }
 
+  async function handleSalarySubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSalaryError("");
+    setSalaryLoading(true);
+
+    const amount = parseFloat(salaryAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setSalaryError("Mức lương không hợp lệ");
+      setSalaryLoading(false);
+      return;
+    }
+
+    const currentRecord = salaryHistory.find((r) => !r.end_date);
+    let currentEndDate: string | null = null;
+    if (currentRecord) {
+      const endDate = new Date(salaryDate);
+      endDate.setDate(endDate.getDate() - 1);
+      currentEndDate = endDate.toISOString().split("T")[0];
+    }
+
+    const res = await fetch(`/api/employees/${id}/salary`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        salary_amount: amount,
+        effective_date: salaryDate,
+        reason: salaryReason || null,
+        current_record_id: currentRecord?.id ?? null,
+        current_end_date: currentEndDate,
+      }),
+      credentials: "include",
+    });
+
+    setSalaryLoading(false);
+    if (!res.ok) {
+      const data = await res.json();
+      setSalaryError("Lỗi: " + (data.error ?? res.statusText));
+      return;
+    }
+
+    setSalaryDialogOpen(false);
+    setSalaryAmount("");
+    setSalaryReason("");
+    fetchFull();
+  }
+
   function formatCurrency(value: number) {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -171,12 +233,6 @@ export default function EmployeeDetailPage() {
     <div className="space-y-6">
       <HeaderBack href="/employees" />
       <HeaderActions>
-        <Link href={`/employees/${id}/salary`}>
-          <Button size="sm" variant="outline">
-            <DollarSign className="h-4 w-4" />
-            <span className="hidden ml-2 md:block">Quản lý lương</span>
-          </Button>
-        </Link>
         {!editing ? (
           <Button size="sm" onClick={() => setEditing(true)}>
             <Pencil className="h-4 w-4" />
@@ -322,15 +378,32 @@ export default function EmployeeDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="salary" className="mt-4">
+        <TabsContent value="salary" className="mt-4 space-y-4">
+          {/* Current salary */}
+          {(() => {
+            const currentSalary = salaryHistory.find((r) => !r.end_date);
+            return currentSalary ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-3xl font-bold">
+                    {formatCurrency(currentSalary.salary_amount)}
+                  </div>
+                  <p className="mt-1 text-sm text-neutral-500">
+                    Lương hiện tại — áp dụng từ{" "}
+                    {new Date(currentSalary.effective_date).toLocaleDateString("vi-VN")}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : null;
+          })()}
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Lịch sử lương</CardTitle>
-              <Link href={`/employees/${id}/salary`}>
-                <Button size="sm" variant="outline">
-                  Cập nhật lương
-                </Button>
-              </Link>
+              <Button size="sm" onClick={() => setSalaryDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Cập nhật lương
+              </Button>
             </CardHeader>
             <CardContent>
               {salaryHistory.length === 0 ? (
@@ -373,6 +446,66 @@ export default function EmployeeDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Salary update dialog */}
+          <Dialog open={salaryDialogOpen} onOpenChange={setSalaryDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cập nhật mức lương</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSalarySubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>
+                    {employee.employment_type === "part_time"
+                      ? "Mức lương mới theo ca (VND)"
+                      : "Mức lương mới theo tháng (VND)"}
+                  </Label>
+                  <Input
+                    type="number"
+                    value={salaryAmount}
+                    onChange={(e) => setSalaryAmount(e.target.value)}
+                    placeholder="10000000"
+                    min="0"
+                    step="1000"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Ngày áp dụng</Label>
+                  <Input
+                    type="date"
+                    value={salaryDate}
+                    onChange={(e) => setSalaryDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Lý do</Label>
+                  <Textarea
+                    value={salaryReason}
+                    onChange={(e) => setSalaryReason(e.target.value)}
+                    placeholder="Lý do điều chỉnh lương"
+                    rows={3}
+                  />
+                </div>
+                {salaryError && (
+                  <p className="text-sm text-red-500">{salaryError}</p>
+                )}
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSalaryDialogOpen(false)}
+                  >
+                    Hủy
+                  </Button>
+                  <Button type="submit" disabled={salaryLoading}>
+                    {salaryLoading ? "Đang xử lý..." : "Lưu"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="attendance" className="mt-4">

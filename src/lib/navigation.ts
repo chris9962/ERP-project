@@ -97,7 +97,7 @@ const PAGES: PageConfig[] = [
     roles: ["admin", "owner"],
     description: "Báo cáo lương",
     homeGroup: null,
-    showInSidebar: false,
+    showInSidebar: true,
   },
   {
     id: PAGE_IDS.ADMIN_USERS,

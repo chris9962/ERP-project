@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: employees } = await supabase
     .from("employees")
-    .select("id, employee_code, full_name, department_id, departments(name)")
+    .select("id, employee_code, full_name, department_id, employment_type, departments(name)")
     .eq("status", "active");
 
   if (!employees?.length) return NextResponse.json([]);
@@ -47,7 +47,10 @@ export async function GET(request: Request) {
 
     const totalDays = attendance?.reduce((sum: number, a: { value: number }) => sum + a.value, 0) || 0;
     const salaryAmount = (salary as { salary_amount: number } | null)?.salary_amount || 0;
-    const totalSalary = (salaryAmount / 26) * totalDays;
+    const totalSalary =
+      emp.employment_type === "part_time"
+        ? salaryAmount * (totalDays / 0.5)
+        : (salaryAmount / 26) * totalDays;
 
     result.push({
       employee_id: emp.id,

@@ -34,30 +34,22 @@ type Employee = {
   start_date: string | null;
   departments: { name: string } | null;
   profiles: { full_name: string | null; email: string | null; roles: { name: string } | null } | null;
+  current_salary: number | null;
 };
 
-type Department = { id: string; name: string };
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterDept, setFilterDept] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
   const fetchData = useCallback(async () => {
-    const [empRes, deptRes] = await Promise.all([
-      fetch("/api/employees", { credentials: "include" }),
-      fetch("/api/departments", { credentials: "include" }),
-    ]);
-    if (empRes.ok) {
-      const data = await empRes.json();
+    const res = await fetch("/api/employees", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
       setEmployees(data as Employee[]);
-    }
-    if (deptRes.ok) {
-      const data = await deptRes.json();
-      setDepartments(data);
     }
     setLoading(false);
   }, []);
@@ -83,6 +75,13 @@ export default function EmployeesPage() {
     part_time: "Bán thời gian",
   };
 
+  function formatCurrency(value: number) {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+  }
+
   const filtered = employees.filter((emp) => {
     const name = emp.full_name || emp.profiles?.full_name || "";
     const code = emp.employee_code || "";
@@ -91,8 +90,7 @@ export default function EmployeesPage() {
       name.toLowerCase().includes(search.toLowerCase()) ||
       code.toLowerCase().includes(search.toLowerCase());
     const matchDept =
-      filterDept === "all" ||
-      (emp.departments as { name: string } | null)?.name === filterDept;
+      filterDept === "all" || emp.employment_type === filterDept;
     const matchStatus = filterStatus === "all" || emp.status === filterStatus;
     return matchSearch && matchDept && matchStatus;
   });
@@ -122,15 +120,12 @@ export default function EmployeesPage() {
         <div className="flex items-center gap-2">
           <Select value={filterDept} onValueChange={setFilterDept}>
             <SelectTrigger className="flex-1 sm:w-[180px]">
-              <SelectValue placeholder="Phòng ban" />
+              <SelectValue placeholder="Loại nhân viên" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả phòng ban</SelectItem>
-              {departments.map((d) => (
-                <SelectItem key={d.id} value={d.name}>
-                  {d.name}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">Tất cả loại</SelectItem>
+              <SelectItem value="full_time">Toàn thời gian</SelectItem>
+              <SelectItem value="part_time">Bán thời gian</SelectItem>
             </SelectContent>
           </Select>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -155,6 +150,7 @@ export default function EmployeesPage() {
               <TableHead className="min-w-[120px]">Họ tên</TableHead>
               <TableHead className="min-w-[100px]">Vai trò</TableHead>
               <TableHead>Loại</TableHead>
+              <TableHead className="text-right">Lương</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày vào làm</TableHead>
               <TableHead className="w-[60px]" />
@@ -163,7 +159,7 @@ export default function EmployeesPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8">
+                <TableCell colSpan={7} className="py-8">
                   <div className="flex justify-center">
                     <LoadingBars message="Đang tải..." />
                   </div>
@@ -171,7 +167,7 @@ export default function EmployeesPage() {
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-neutral-400">
+                <TableCell colSpan={7} className="py-8 text-center text-neutral-400">
                   Không có nhân viên nào
                 </TableCell>
               </TableRow>
@@ -188,6 +184,11 @@ export default function EmployeesPage() {
                     <Badge variant="outline">
                       {typeLabels[emp.employment_type] || emp.employment_type}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right text-neutral-600">
+                    {emp.current_salary
+                      ? formatCurrency(emp.current_salary)
+                      : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge

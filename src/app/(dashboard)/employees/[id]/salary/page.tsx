@@ -161,7 +161,7 @@ export default function EmployeeSalaryPage() {
                   onChange={(e) => setFormAmount(e.target.value)}
                   placeholder="10000000"
                   min="0"
-                  step="100000"
+                  step="1000"
                   required
                 />
               </div>

@@ -5,10 +5,21 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("employees")
-    .select("*, departments(name), profiles(full_name, email, roles(name))")
+    .select("*, departments(name), profiles(full_name, email, roles(name)), salary_history(salary_amount, effective_date, end_date)")
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data ?? []);
+
+  const result = (data ?? []).map((emp) => {
+    const currentSalary = (emp.salary_history as { salary_amount: number; effective_date: string; end_date: string | null }[] | null)
+      ?.filter((s) => !s.end_date)
+      ?.sort((a, b) => b.effective_date.localeCompare(a.effective_date))[0] ?? null;
+    return {
+      ...emp,
+      current_salary: currentSalary?.salary_amount ?? null,
+    };
+  });
+
+  return NextResponse.json(result);
 }
 
 export async function POST(request: Request) {
