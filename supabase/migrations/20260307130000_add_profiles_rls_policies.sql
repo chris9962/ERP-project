@@ -1,2 +1,2 @@
--- [DEPRECATED] Policies moved to 20260308_sync_all_rls_policies.sql
+-- [DEPRECATED] Policies moved to 20260308032734_sync_all_rls_policies.sql
 -- This file is kept empty to avoid migration history conflicts.

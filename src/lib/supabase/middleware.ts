@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getRouteRoles } from "@/lib/navigation";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -56,20 +57,12 @@ export async function updateSession(request: NextRequest) {
     .single();
   const roleName = (profile?.roles as unknown as { name: string } | null)?.name;
 
-  // Role-based access control
-  const roleAccess: Record<string, string[]> = {
-    "/admin": ["admin"],
-    "/employees": ["admin", "manager", "office_staff"],
-    "/attendance": ["admin", "manager", "office_staff"],
-    "/reports": ["admin", "owner"],
-  };
-
-  for (const [path, allowedRoles] of Object.entries(roleAccess)) {
-    if (pathname.startsWith(path) && roleName && !allowedRoles.includes(roleName)) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
-    }
+  // Role-based access control (single source of truth: PAGES)
+  const allowedRoles = getRouteRoles(pathname);
+  if (allowedRoles && roleName && !allowedRoles.includes(roleName)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
