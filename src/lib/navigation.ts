@@ -56,7 +56,7 @@ const PAGES: PageConfig[] = [
     roles: ["admin", "owner", "manager"],
     description: "Điểm danh hôm nay",
     homeGroup: null,
-    showInSidebar: true,
+    showInSidebar: false,
   },
   {
     id: PAGE_IDS.ATTENDANCE,
@@ -87,7 +87,7 @@ const PAGES: PageConfig[] = [
     roles: ["admin", "owner"],
     description: "Thống kê theo kỳ",
     homeGroup: "nhan-vien",
-    showInSidebar: true,
+    showInSidebar: false,
   },
   {
     id: PAGE_IDS.REPORT_SALARY,
@@ -97,7 +97,7 @@ const PAGES: PageConfig[] = [
     roles: ["admin", "owner"],
     description: "Báo cáo lương",
     homeGroup: null,
-    showInSidebar: true,
+    showInSidebar: false,
   },
   {
     id: PAGE_IDS.ADMIN_USERS,
@@ -117,7 +117,7 @@ const PAGES: PageConfig[] = [
     roles: ["admin"],
     description: "Phòng ban, bộ phận",
     homeGroup: "he-thong",
-    showInSidebar: true,
+    showInSidebar: false,
     sidebarLabel: "Phòng ban",
   },
   {
@@ -166,7 +166,7 @@ export function getHomeGroupPages(
   roleName: string | null,
 ): PageConfig[] {
   return filterPagesByRole(
-    PAGES.filter((p) => p.homeGroup === group),
+    PAGES.filter((p) => p.homeGroup === group && p.showInSidebar),
     roleName,
   );
 }

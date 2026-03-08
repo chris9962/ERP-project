@@ -28,6 +28,7 @@ body {
 
 * {
   border-color: var(--border);
+  box-sizing: border-box;
 }
 
 @keyframes loadingBar {
@@ -44,6 +45,14 @@ body {
 
 .animate-loading-bar {
   animation: loadingBar 1s ease-in-out infinite;
+}
+
+/* Đồng bộ chiều cao input date với các input/select khác */
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 2.5rem; /* h-10 = 40px */
+  box-sizing: border-box;
 }
 
 /* Scanner CCCD: đảm bảo video từ html5-qrcode hiển thị */

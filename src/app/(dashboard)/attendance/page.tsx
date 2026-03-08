@@ -271,8 +271,8 @@ export default function AttendancePage() {
         </Button>
       </HeaderActions>
 
-      <div className="flex flex-col gap-3 sm:hidden">
-        <div className="flex items-end gap-3">
+      <div className="flex flex-col gap-4 sm:hidden">
+        <div className="flex items-end gap-4">
           <div className="space-y-1 flex-1 min-w-0">
             <label className="text-xs font-medium text-neutral-500">Ngày</label>
             <Input
@@ -284,19 +284,19 @@ export default function AttendancePage() {
           </div>
           <div className="space-y-1 flex-1 min-w-0">
             <label className="text-xs font-medium text-neutral-500">Phòng ban</label>
-            <Select value={filterDept} onValueChange={setFilterDept}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Tất cả" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả phòng ban</SelectItem>
-                {departments.map((d) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select value={filterDept} onValueChange={setFilterDept}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Tất cả" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả phòng ban</SelectItem>
+              {departments.map((d) => (
+                <SelectItem key={d.id} value={d.id}>
+                  {d.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
         </div>
         <div className="flex items-end gap-2">
