@@ -57,7 +57,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
           <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
             <Image
               src="/logo/logo.jpeg"
-              alt="LegoFood"
+              alt="LegiFood"
               fill
               className="object-cover"
               sizes="32px"
@@ -66,7 +66,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
           </div>
           {(!collapsed || mobileOpen) && (
             <span className="text-base font-semibold tracking-tight text-neutral-900">
-              LegoFood
+              LegiFood
             </span>
           )}
         </Link>

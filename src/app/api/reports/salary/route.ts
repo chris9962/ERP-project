@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       employee_id: emp.id,
       employee_code: emp.employee_code || "",
       full_name: emp.full_name || "",
-      department_name: (emp.departments as { name: string } | null)?.name || "",
+      department_name: (emp.departments as unknown as { name: string } | null)?.name || "",
       salary_amount: salaryAmount,
       total_days: totalDays,
       total_salary: totalSalary,

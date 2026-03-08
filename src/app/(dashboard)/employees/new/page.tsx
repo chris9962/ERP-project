@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +25,6 @@ export default function NewEmployeePage() {
   const router = useRouter();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   // Form
   const [fullName, setFullName] = useState("");
@@ -54,7 +54,6 @@ export default function NewEmployeePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     // 1. Create user account
@@ -73,7 +72,7 @@ export default function NewEmployeePage() {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error || "Lỗi khi tạo tài khoản");
+      toast.error(data.error || "Lỗi khi tạo tài khoản");
       setLoading(false);
       return;
     }
@@ -100,7 +99,7 @@ export default function NewEmployeePage() {
 
     if (!empRes.ok) {
       const data = await empRes.json();
-      setError("Lỗi khi tạo nhân viên: " + (data.error ?? empRes.statusText));
+      toast.error("Lỗi khi tạo nhân viên: " + (data.error ?? empRes.statusText));
       setLoading(false);
       return;
     }
@@ -239,8 +238,6 @@ export default function NewEmployeePage() {
                     />
                   </div>
                 </div>
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
 
             <div className="flex gap-3">
               <Button type="submit" disabled={loading}>
