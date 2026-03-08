@@ -10,7 +10,7 @@ export async function GET(
   const [empRes, deptRes, salRes, attRes] = await Promise.all([
     supabase
       .from("employees")
-      .select("*, departments(name), profiles(full_name, email)")
+      .select("*, departments(name), profiles(full_name, email, role_id, roles(name))")
       .eq("id", id)
       .single(),
     supabase.from("departments").select("id, name").order("name"),

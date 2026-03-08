@@ -23,6 +23,7 @@ import {
 import { Plus, Search, Eye } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
+import { getRoleLabel } from "@/lib/utils";
 
 type Employee = {
   id: string;
@@ -32,7 +33,7 @@ type Employee = {
   status: string;
   start_date: string | null;
   departments: { name: string } | null;
-  profiles: { full_name: string | null; email: string | null } | null;
+  profiles: { full_name: string | null; email: string | null; roles: { name: string } | null } | null;
 };
 
 type Department = { id: string; name: string };
@@ -152,7 +153,7 @@ export default function EmployeesPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="min-w-[120px]">Họ tên</TableHead>
-              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
+              <TableHead className="min-w-[100px]">Vai trò</TableHead>
               <TableHead>Loại</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày vào làm</TableHead>
@@ -181,7 +182,7 @@ export default function EmployeesPage() {
                     {emp.full_name || emp.profiles?.full_name || "—"}
                   </TableCell>
                   <TableCell className="text-neutral-500">
-                    {(emp.departments as { name: string } | null)?.name || "—"}
+                    {getRoleLabel(emp.profiles?.roles?.name)}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">

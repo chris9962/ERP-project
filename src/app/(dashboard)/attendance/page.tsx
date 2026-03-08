@@ -24,6 +24,7 @@ import { Save, Search, EyeOff, ScanLine } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 import { HeaderActions } from "@/components/layout/header-actions";
+import { getRoleLabel } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,7 @@ type Employee = {
   cccd_number?: string | null;
   department_id: string | null;
   departments: { id: string; name: string } | null;
+  profiles: { roles: { name: string } | null } | null;
   status: string;
 };
 
@@ -406,7 +408,7 @@ export default function AttendancePage() {
             <TableRow>
               <TableHead className="w-[50px]">STT</TableHead>
               <TableHead className="min-w-[120px]">Họ tên</TableHead>
-              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
+              <TableHead className="min-w-[100px]">Vai trò</TableHead>
               <TableHead className="w-[90px] text-center">Nửa ngày</TableHead>
               <TableHead className="w-[90px] text-center">Đủ ngày</TableHead>
               <TableHead className="w-[90px] text-center">Tăng ca</TableHead>
@@ -439,8 +441,7 @@ export default function AttendancePage() {
                       {emp.full_name || "—"}
                     </TableCell>
                     <TableCell className="text-neutral-500">
-                      {(emp.departments as { name: string } | null)?.name ||
-                        "—"}
+                      {getRoleLabel(emp.profiles?.roles?.name)}
                     </TableCell>
                     {valueOptions.map((opt) => (
                       <TableCell key={opt.value} className="text-center">
@@ -490,7 +491,7 @@ export default function AttendancePage() {
                       {idx + 1}. {emp.full_name || "—"}
                     </p>
                     <p className="text-sm text-neutral-500">
-                      {(emp.departments as { name: string } | null)?.name || "—"}
+                      {getRoleLabel(emp.profiles?.roles?.name)}
                     </p>
                   </div>
                 </div>

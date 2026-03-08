@@ -38,6 +38,7 @@ export default function NewEmployeePage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [salaryAmount, setSalaryAmount] = useState("");
+  const [roleName, setRoleName] = useState("worker");
   const [scannerOpen, setScannerOpen] = useState(false);
 
   const fetchDepartments = useCallback(async () => {
@@ -65,8 +66,8 @@ export default function NewEmployeePage() {
         password,
         full_name: fullName,
         phone: "",
-        role_id: null, // Will set worker role
-        role_name: "worker",
+        role_id: null,
+        role_name: roleName,
       }),
     });
 
@@ -193,6 +194,21 @@ export default function NewEmployeePage() {
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Vai trò</Label>
+                    <Select value={roleName} onValueChange={setRoleName}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="worker">Công nhân</SelectItem>
+                        <SelectItem value="office_staff">Văn phòng</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

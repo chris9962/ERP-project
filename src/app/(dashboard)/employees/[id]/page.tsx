@@ -27,6 +27,7 @@ import {
 import LoadingBars from "@/components/ui/loading-bars";
 import { DollarSign, Pencil } from "lucide-react";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
+import { getRoleLabel } from "@/lib/utils";
 
 type Department = { id: string; name: string };
 type Employee = {
@@ -40,7 +41,7 @@ type Employee = {
   start_date: string | null;
   department_id: string | null;
   departments: { name: string } | null;
-  profiles: { full_name: string | null; email: string | null } | null;
+  profiles: { full_name: string | null; email: string | null; role_id: string | null; roles: { name: string } | null } | null;
 };
 type SalaryRecord = {
   id: string;
@@ -271,6 +272,12 @@ export default function EmployeeDetailPage() {
                         : "Bán thời gian"}
                     </p>
                   )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Vai trò</Label>
+                  <p className="text-sm">
+                    {getRoleLabel(employee.profiles?.roles?.name)}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label>Trạng thái</Label>

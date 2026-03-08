@@ -70,7 +70,7 @@ export default function AdminUsersPage() {
   }, []);
 
   const fetchRoles = useCallback(async () => {
-    const res = await fetch("/api/admin/roles", { credentials: "include" });
+    const res = await fetch("/api/admin/roles?group=admin", { credentials: "include" });
     if (res.ok) {
       const data = await res.json();
       setRoles(data);

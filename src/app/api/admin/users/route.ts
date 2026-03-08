@@ -3,15 +3,22 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const supabase = await createClient();
+
+  // Only show manager, owner, admin roles in user management
+  const ADMIN_ROLES = ["manager", "owner", "admin"];
+  const { data: roles } = await supabase.from("roles").select("*").order("name");
+  const rolesMap = new Map((roles ?? []).map((r) => [r.id, r]));
+  const adminRoleIds = (roles ?? [])
+    .filter((r) => ADMIN_ROLES.includes(r.name))
+    .map((r) => r.id);
+
   const { data: profiles, error: pe } = await supabase
     .from("profiles")
     .select("*")
+    .in("role_id", adminRoleIds)
     .order("created_at", { ascending: false });
   if (pe) return NextResponse.json({ error: pe.message }, { status: 500 });
   if (!profiles?.length) return NextResponse.json(profiles ?? []);
-
-  const { data: roles } = await supabase.from("roles").select("*").order("name");
-  const rolesMap = new Map((roles ?? []).map((r) => [r.id, r]));
 
   const list = profiles.map((p) => ({
     ...p,
