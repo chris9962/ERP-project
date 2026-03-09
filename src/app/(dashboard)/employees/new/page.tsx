@@ -55,7 +55,12 @@ export default function NewEmployeePage() {
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-  const [dob, setDob] = useState(searchParams.get("dob") || "");
+  const [dob, setDob] = useState(() => {
+    const d = searchParams.get("dob") || "";
+    // Convert ddMMyyyy → yyyy-MM-dd nếu cần
+    if (/^\d{8}$/.test(d)) return `${d.slice(4, 8)}-${d.slice(2, 4)}-${d.slice(0, 2)}`;
+    return d;
+  });
   const [address, setAddress] = useState(searchParams.get("address") || "");
   const [gender, setGender] = useState(searchParams.get("gender") || "");
   const [email, setEmail] = useState("");

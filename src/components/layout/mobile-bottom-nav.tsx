@@ -153,6 +153,9 @@ export function MobileBottomNav() {
     const params = new URLSearchParams();
     if (scannedData?.fullName) params.set("fullName", scannedData.fullName);
     if (scannedData?.cccdNumber) params.set("cccd", scannedData.cccdNumber);
+    if (scannedData?.dob) params.set("dob", scannedData.dob);
+    if (scannedData?.address) params.set("address", scannedData.address);
+    if (scannedData?.gender) params.set("gender", scannedData.gender);
     router.push(`/employees/new?${params.toString()}`);
   }, [router, scannedData]);
 

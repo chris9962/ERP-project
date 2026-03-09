@@ -82,25 +82,39 @@ function getCropRegions(imgW: number, imgH: number): Region[] {
   return [
     // Full image
     { x: 0, y: 0, w: imgW, h: imgH },
-    // Top-right quadrant (most common QR location on CCCD)
+    // Top-right quadrant
     { x: Math.round(imgW * 0.55), y: 0, w: Math.round(imgW * 0.45), h: Math.round(imgH * 0.5) },
-    // Top-right wider
-    { x: Math.round(imgW * 0.4), y: 0, w: Math.round(imgW * 0.6), h: Math.round(imgH * 0.6) },
+    // Bottom-right quadrant (QR có thể nằm ở dưới)
+    { x: Math.round(imgW * 0.55), y: Math.round(imgH * 0.5), w: Math.round(imgW * 0.45), h: Math.round(imgH * 0.5) },
     // Right half
     { x: Math.round(imgW * 0.5), y: 0, w: Math.round(imgW * 0.5), h: imgH },
+    // Bottom half
+    { x: 0, y: Math.round(imgH * 0.5), w: imgW, h: Math.round(imgH * 0.5) },
     // Top half
     { x: 0, y: 0, w: imgW, h: Math.round(imgH * 0.5) },
   ];
+}
+
+// ── Timeout helper ──
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
 }
 
 // ── Strategy 1: qr-scanner (ZXing WASM) - most robust ──
 
 async function tryQrScanner(canvas: HTMLCanvasElement): Promise<string | null> {
   try {
-    const result = await QrScanner.scanImage(canvas, {
-      returnDetailedScanResult: true,
-      alsoTryWithoutScanRegion: true,
-    });
+    const result = await withTimeout(
+      QrScanner.scanImage(canvas, {
+        returnDetailedScanResult: true,
+        alsoTryWithoutScanRegion: true,
+      }),
+      5000
+    );
     if (result?.data) return result.data;
   } catch {
     // QR not found or error
@@ -153,9 +167,41 @@ async function tryJsQR(canvas: HTMLCanvasElement): Promise<string | null> {
   return null;
 }
 
-// ── Main decoder: image upload (thorough, multi-strategy × multi-crop × multi-scale) ──
+// ── Mobile detection ──
+
+function isMobile(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// ── Simple decoder (mobile - version cũ, nhẹ, ổn định) ──
+
+async function decodeQRSimple(source: ImageBitmap): Promise<string | null> {
+  const canvas = document.createElement("canvas");
+  canvas.width = source.width;
+  canvas.height = source.height;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(source, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  const jsQR = (await import("jsqr")).default;
+  const code = jsQR(imageData.data, imageData.width, imageData.height, {
+    inversionAttempts: "attemptBoth",
+  });
+  return code?.data ?? null;
+}
+
+// ── Main decoder: chọn strategy theo thiết bị ──
 
 export async function decodeQRFromImage(source: ImageBitmap): Promise<string | null> {
+  if (isMobile()) {
+    return decodeQRSimple(source);
+  }
+  // Desktop: multi-strategy, timeout 15s
+  return withTimeout(decodeQRFromImageInner(source), 15000);
+}
+
+async function decodeQRFromImageInner(source: ImageBitmap): Promise<string | null> {
   const sw = source.width;
   const sh = source.height;
   const regions = getCropRegions(sw, sh);
@@ -197,20 +243,29 @@ export async function decodeQRFromImage(source: ImageBitmap): Promise<string | n
   return null;
 }
 
-// ── Video frame decoder (fast path for live camera) ──
+// ── Video frame decoder ──
 
 export async function decodeQRFromVideo(video: HTMLVideoElement): Promise<string | null> {
   const canvas = sourceToCanvas(video);
 
-  // Fast: qr-scanner on full frame
+  if (isMobile()) {
+    // Mobile: jsqr đơn giản, nhẹ, nhanh
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const jsQR = (await import("jsqr")).default;
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: "attemptBoth",
+    });
+    return code?.data ?? null;
+  }
+
+  // Desktop: multi-strategy
   const qrResult = await tryQrScanner(canvas);
   if (qrResult) return qrResult;
 
-  // Fast: BarcodeDetector on full frame
   const bdResult = await tryBarcodeDetector(canvas);
   if (bdResult) return bdResult;
 
-  // Crop top-right + qr-scanner (CCCD QR location)
   const cropX = Math.round(canvas.width * 0.55);
   const cropW = canvas.width - cropX;
   const cropH = Math.round(canvas.height * 0.5);
