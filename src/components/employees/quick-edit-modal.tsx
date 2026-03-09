@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import LoadingBars from "@/components/ui/loading-bars";
 
+
 type Department = { id: string; name: string };
 
 type EmployeeFull = {
@@ -28,11 +29,15 @@ type EmployeeFull = {
   employee_code: string | null;
   full_name: string | null;
   cccd_number: string | null;
+  dob: string | null;
+  address: string | null;
+  gender: string | null;
   employment_type: string;
   status: string;
   start_date: string | null;
   department_id: string | null;
   salary_amount: number | null;
+  avatar_url: string | null;
   departments: { name: string } | null;
   profiles: {
     full_name: string | null;
@@ -62,10 +67,14 @@ export default function QuickEditModal({
 
   const [formName, setFormName] = useState("");
   const [formCccd, setFormCccd] = useState("");
+  const [formDob, setFormDob] = useState("");
+  const [formAddress, setFormAddress] = useState("");
+  const [formGender, setFormGender] = useState("");
   const [formDeptId, setFormDeptId] = useState("");
   const [formType, setFormType] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const [formSalary, setFormSalary] = useState("");
+  const [formAvatarUrl, setFormAvatarUrl] = useState("");
 
   useEffect(() => {
     if (!open || !employeeId) return;
@@ -80,10 +89,14 @@ export default function QuickEditModal({
         setDepartments(data.departments ?? []);
         setFormName(emp.full_name || "");
         setFormCccd(emp.cccd_number || "");
+        setFormDob(emp.dob || "");
+        setFormAddress(emp.address || "");
+        setFormGender(emp.gender || "");
         setFormDeptId(emp.department_id || "");
         setFormType(emp.employment_type);
         setFormStatus(emp.status);
         setFormSalary(String(emp.salary_amount || 0));
+        setFormAvatarUrl(emp.avatar_url || "");
       })
       .finally(() => setLoading(false));
   }, [open, employeeId]);
@@ -97,10 +110,14 @@ export default function QuickEditModal({
       body: JSON.stringify({
         full_name: formName,
         cccd_number: formCccd || null,
+        dob: formDob || null,
+        address: formAddress || null,
+        gender: formGender || null,
         department_id: formDeptId || null,
         employment_type: formType,
         status: formStatus,
         salary_amount: formSalary,
+        avatar_url: formAvatarUrl || null,
       }),
       credentials: "include",
     });
@@ -143,47 +160,35 @@ export default function QuickEditModal({
                 onChange={(e) => setFormCccd(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Phòng ban</Label>
-              <Select value={formDeptId} onValueChange={setFormDeptId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn phòng ban" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Loại nhân viên</Label>
-                <Select value={formType} onValueChange={setFormType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="full_time">Toàn thời gian</SelectItem>
-                    <SelectItem value="part_time">Bán thời gian</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Ngày sinh</Label>
+                <Input
+                  type="date"
+                  value={formDob}
+                  onChange={(e) => setFormDob(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
-                <Label>Trạng thái</Label>
-                <Select value={formStatus} onValueChange={setFormStatus}>
+                <Label>Giới tính</Label>
+                <Select value={formGender} onValueChange={setFormGender}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Chọn" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Đang làm</SelectItem>
-                    <SelectItem value="inactive">Tạm nghỉ</SelectItem>
-                    <SelectItem value="resigned">Đã nghỉ</SelectItem>
+                    <SelectItem value="Nam">Nam</SelectItem>
+                    <SelectItem value="Nữ">Nữ</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Địa chỉ</Label>
+              <Input
+                value={formAddress}
+                onChange={(e) => setFormAddress(e.target.value)}
+                placeholder="Địa chỉ thường trú"
+              />
             </div>
             <div className="space-y-2">
               <Label>

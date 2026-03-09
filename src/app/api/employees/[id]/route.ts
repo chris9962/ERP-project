@@ -24,17 +24,21 @@ export async function PATCH(
   const { id } = await params;
   const supabase = await createClient();
   const body = await request.json();
-  const { full_name, employee_code, cccd_number, department_id, employment_type, status, salary_amount } = body;
+  const { full_name, employee_code, cccd_number, dob, address, gender, department_id, employment_type, status, salary_amount, avatar_url } = body;
   const { data, error } = await supabase
     .from("employees")
     .update({
       ...(full_name !== undefined && { full_name }),
       ...(employee_code !== undefined && { employee_code: employee_code || null }),
       ...(cccd_number !== undefined && { cccd_number: cccd_number || null }),
+      ...(dob !== undefined && { dob: dob || null }),
+      ...(address !== undefined && { address: address || null }),
+      ...(gender !== undefined && { gender: gender || null }),
       ...(department_id !== undefined && { department_id: department_id || null }),
       ...(employment_type !== undefined && { employment_type }),
       ...(status !== undefined && { status }),
       ...(salary_amount !== undefined && { salary_amount: parseFloat(salary_amount) || 0 }),
+      ...(avatar_url !== undefined && { avatar_url: avatar_url || null }),
     })
     .eq("id", id)
     .select()

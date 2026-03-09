@@ -18,12 +18,16 @@ export async function POST(request: Request) {
     profile_id,
     full_name,
     cccd_number,
+    dob,
+    address,
+    gender,
     employee_code,
     department_id,
     employment_type,
     start_date,
     status,
     salary_amount,
+    avatar_url,
   } = body;
 
   // Auto-generate employee_code: NV000001, NV000002, ...
@@ -46,12 +50,16 @@ export async function POST(request: Request) {
       profile_id,
       full_name: full_name ?? "",
       cccd_number: cccd_number || null,
+      dob: dob || null,
+      address: address || null,
+      gender: gender || null,
       employee_code: code,
       department_id: department_id || null,
       employment_type: employment_type ?? "full_time",
       start_date: start_date || null,
       status: status ?? "active",
       salary_amount: salary_amount ? parseFloat(salary_amount) : 0,
+      avatar_url: avatar_url || null,
     })
     .select()
     .single();

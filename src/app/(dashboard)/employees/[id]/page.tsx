@@ -24,9 +24,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
-import { Pencil } from "lucide-react";
+import { Pencil, User } from "lucide-react";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
 import { getRoleLabel } from "@/lib/utils";
+import AvatarUpload from "@/components/employees/avatar-upload";
 
 type Department = { id: string; name: string };
 type Employee = {
@@ -35,11 +36,15 @@ type Employee = {
   employee_code: string | null;
   full_name: string | null;
   cccd_number: string | null;
+  dob: string | null;
+  address: string | null;
+  gender: string | null;
   employment_type: string;
   status: string;
   start_date: string | null;
   department_id: string | null;
   salary_amount: number | null;
+  avatar_url: string | null;
   departments: { name: string } | null;
   profiles: { full_name: string | null; email: string | null; role_id: string | null; roles: { name: string } | null } | null;
 };
@@ -65,10 +70,14 @@ export default function EmployeeDetailPage() {
   const [formName, setFormName] = useState("");
   const [formCode, setFormCode] = useState("");
   const [formCccd, setFormCccd] = useState("");
+  const [formDob, setFormDob] = useState("");
+  const [formAddress, setFormAddress] = useState("");
+  const [formGender, setFormGender] = useState("");
   const [formDeptId, setFormDeptId] = useState("");
   const [formType, setFormType] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const [formSalary, setFormSalary] = useState("");
+  const [formAvatarUrl, setFormAvatarUrl] = useState("");
 
   const fetchFull = useCallback(async () => {
     const res = await fetch(`/api/employees/${id}/full`, { credentials: "include" });
@@ -83,10 +92,14 @@ export default function EmployeeDetailPage() {
       setFormName(emp.full_name || "");
       setFormCode(emp.employee_code || "");
       setFormCccd(emp.cccd_number || "");
+      setFormDob(emp.dob || "");
+      setFormAddress(emp.address || "");
+      setFormGender(emp.gender || "");
       setFormDeptId(emp.department_id || "");
       setFormType(emp.employment_type);
       setFormStatus(emp.status);
       setFormSalary(String(emp.salary_amount || 0));
+      setFormAvatarUrl(emp.avatar_url || "");
     }
     setDepartments(data.departments ?? []);
     setAttendance(data.attendance ?? []);
@@ -106,10 +119,14 @@ export default function EmployeeDetailPage() {
         full_name: formName,
         employee_code: formCode || null,
         cccd_number: formCccd || null,
+        dob: formDob || null,
+        address: formAddress || null,
+        gender: formGender || null,
         department_id: formDeptId || null,
         employment_type: formType,
         status: formStatus,
         salary_amount: formSalary,
+        avatar_url: formAvatarUrl || null,
       }),
       credentials: "include",
     });
@@ -190,6 +207,31 @@ export default function EmployeeDetailPage() {
         <TabsContent value="info" className="mt-4">
           <Card>
             <CardContent className="pt-6">
+              {editing ? (
+                <div className="mb-5">
+                  <AvatarUpload
+                    currentUrl={formAvatarUrl || null}
+                    onUploaded={(url) => setFormAvatarUrl(url)}
+                    onRemoved={() => setFormAvatarUrl("")}
+                  />
+                </div>
+              ) : (
+                <div className="mb-5 flex justify-center">
+                  <div className="h-28 w-28 rounded-full overflow-hidden border-2 border-neutral-200">
+                    {employee.avatar_url ? (
+                      <img
+                        src={employee.avatar_url}
+                        alt={employee.full_name || "Avatar"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center bg-neutral-100">
+                        <User className="h-12 w-12 text-neutral-400" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Mã nhân viên</Label>
@@ -216,6 +258,62 @@ export default function EmployeeDetailPage() {
                   ) : (
                     <p className="text-sm">{employee.cccd_number || "—"}</p>
                   )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Ngày sinh</Label>
+                  {editing ? (
+                    <Input
+                      type="date"
+                      value={formDob}
+                      onChange={(e) => setFormDob(e.target.value)}
+                    />
+                  ) : (
+                    <p className="text-sm">
+                      {employee.dob
+                        ? new Date(employee.dob).toLocaleDateString("vi-VN")
+                        : "—"}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Giới tính</Label>
+                  {editing ? (
+                    <Select value={formGender} onValueChange={setFormGender}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn giới tính" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Nam">Nam</SelectItem>
+                        <SelectItem value="Nữ">Nữ</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="text-sm">{employee.gender || "—"}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <p className="text-sm">
+                    {employee.profiles?.email || "—"}
+                  </p>
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Địa chỉ</Label>
+                  {editing ? (
+                    <Input
+                      value={formAddress}
+                      onChange={(e) => setFormAddress(e.target.value)}
+                      placeholder="Địa chỉ thường trú"
+                    />
+                  ) : (
+                    <p className="text-sm">{employee.address || "—"}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Vai trò</Label>
+                  <p className="text-sm">
+                    {getRoleLabel(employee.profiles?.roles?.name)}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label>Phòng ban</Label>
@@ -284,12 +382,6 @@ export default function EmployeeDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Vai trò</Label>
-                  <p className="text-sm">
-                    {getRoleLabel(employee.profiles?.roles?.name)}
-                  </p>
-                </div>
-                <div className="space-y-2">
                   <Label>Trạng thái</Label>
                   {editing ? (
                     <Select value={formStatus} onValueChange={setFormStatus}>
@@ -319,12 +411,6 @@ export default function EmployeeDetailPage() {
                         "vi-VN",
                       )
                       : "—"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <p className="text-sm">
-                    {employee.profiles?.email || "—"}
                   </p>
                 </div>
               </div>

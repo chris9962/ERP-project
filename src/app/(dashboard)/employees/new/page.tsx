@@ -18,8 +18,27 @@ import { ScanLine } from "lucide-react";
 import Link from "next/link";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
+import AvatarUpload from "@/components/employees/avatar-upload";
 
 type Department = { id: string; name: string };
+
+function generateEmail(fullName: string): string {
+  if (!fullName.trim()) return "";
+  // Normalize Vietnamese characters to ASCII
+  const normalized = fullName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .trim();
+  const parts = normalized.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "";
+  // Last name initials + first name: "nguyen van cuong" -> "nvcuong"
+  const lastName = parts.slice(0, -1).map((p) => p[0]).join("");
+  const firstName = parts[parts.length - 1];
+  return `${lastName}${firstName}@legifood.com`;
+}
 
 export default function NewEmployeePage() {
   const router = useRouter();
@@ -36,10 +55,15 @@ export default function NewEmployeePage() {
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split("T")[0],
   );
+  const [dob, setDob] = useState(searchParams.get("dob") || "");
+  const [address, setAddress] = useState(searchParams.get("address") || "");
+  const [gender, setGender] = useState(searchParams.get("gender") || "");
   const [email, setEmail] = useState("");
+  const [emailManual, setEmailManual] = useState(false);
   const [password, setPassword] = useState("");
   const [salaryAmount, setSalaryAmount] = useState("");
   const [roleName, setRoleName] = useState("worker");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
 
   const fetchDepartments = useCallback(async () => {
@@ -88,12 +112,16 @@ export default function NewEmployeePage() {
         profile_id: userId,
         full_name: fullName,
         cccd_number: cccdNumber || null,
+        dob: dob || null,
+        address: address || null,
+        gender: gender || null,
         employee_code: employeeCode || null,
         department_id: departmentId || null,
         employment_type: employmentType,
         start_date: startDate,
         status: "active",
         salary_amount: salaryAmount || 0,
+        avatar_url: avatarUrl || null,
       }),
       credentials: "include",
     });
@@ -109,9 +137,21 @@ export default function NewEmployeePage() {
     router.push("/employees");
   }
 
-  function handleQrScanResult(data: { fullName: string; cccdNumber: string | null }) {
+  function handleQrScanResult(data: { fullName: string; cccdNumber: string | null; dob: string | null; address: string | null; gender: string | null }) {
     setFullName(data.fullName);
+    if (!emailManual) setEmail(generateEmail(data.fullName));
     if (data.cccdNumber) setCccdNumber(data.cccdNumber);
+    if (data.dob) {
+      // Convert from ddMMyyyy to yyyy-MM-dd
+      const d = data.dob;
+      if (/^\d{8}$/.test(d)) {
+        setDob(`${d.slice(4, 8)}-${d.slice(2, 4)}-${d.slice(0, 2)}`);
+      } else {
+        setDob(d);
+      }
+    }
+    if (data.address) setAddress(data.address);
+    if (data.gender) setGender(data.gender);
     setScannerOpen(false);
   }
 
@@ -133,12 +173,22 @@ export default function NewEmployeePage() {
         <CardContent className="pt-6">
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <AvatarUpload
+              currentUrl={null}
+              onUploaded={(url) => setAvatarUrl(url)}
+              onRemoved={() => setAvatarUrl("")}
+            />
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Họ và tên *</Label>
                 <Input
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setFullName(name);
+                    if (!emailManual) setEmail(generateEmail(name));
+                  }}
                   placeholder="Nguyen Van A"
                   required
                 />
@@ -155,6 +205,50 @@ export default function NewEmployeePage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
+                <Label>Ngày sinh</Label>
+                <Input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Giới tính</Label>
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn giới tính" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Nam">Nam</SelectItem>
+                    <SelectItem value="Nữ">Nữ</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Địa chỉ</Label>
+              <Input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Địa chỉ thường trú"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Vai trò</Label>
+                <Select value={roleName} onValueChange={setRoleName}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="worker">Công nhân</SelectItem>
+                    <SelectItem value="office_staff">Văn phòng</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label>Phòng ban</Label>
                 <Select value={departmentId} onValueChange={setDepartmentId}>
                   <SelectTrigger>
@@ -169,6 +263,9 @@ export default function NewEmployeePage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Loại nhân viên</Label>
                 <Select
@@ -184,9 +281,6 @@ export default function NewEmployeePage() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Ngày vào làm</Label>
                 <Input
@@ -194,18 +288,6 @@ export default function NewEmployeePage() {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Vai trò</Label>
-                <Select value={roleName} onValueChange={setRoleName}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="worker">Công nhân</SelectItem>
-                    <SelectItem value="office_staff">Văn phòng</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
@@ -219,9 +301,11 @@ export default function NewEmployeePage() {
                   <Input
                     type="email"
                     value={email}
+                    onFocus={() => setEmailManual(true)}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@company.com"
                     required
+                    autoComplete="off"
                   />
                 </div>
                 <div className="space-y-2">
@@ -233,6 +317,7 @@ export default function NewEmployeePage() {
                     placeholder="Tối thiểu 6 ký tự"
                     required
                     minLength={6}
+                    autoComplete="new-password"
                   />
                 </div>
               </div>
