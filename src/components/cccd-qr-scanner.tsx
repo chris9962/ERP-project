@@ -8,8 +8,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Camera } from "lucide-react";
+import { ImageIcon, Loader2 } from "lucide-react";
 import { parseCCCDFromQR, type CCCDQRData } from "@/lib/cccd-qr";
+import { decodeQRFromImage, decodeQRFromVideo } from "@/lib/qr-decode";
 
 type CCCDQRScannerProps = {
   open: boolean;
@@ -19,14 +20,16 @@ type CCCDQRScannerProps = {
 
 export function CCCDQRScanner({ open, onCloseAction, onScanAction }: CCCDQRScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>("");
+  const [cameraDenied, setCameraDenied] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const foundRef = useRef(false);
+  const mountedRef = useRef(false);
 
   const stopCamera = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
@@ -53,147 +56,140 @@ export function CCCDQRScanner({ open, onCloseAction, onScanAction }: CCCDQRScann
     [stopCamera, onScanAction, onCloseAction]
   );
 
+  const startCamera = useCallback(async () => {
+    if (!mountedRef.current || foundRef.current) return;
+
+    setScanning(true);
+    setProcessing(false);
+
+    try {
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { exact: "environment" },
+            width: { ideal: 1920, min: 1280 },
+            height: { ideal: 1080, min: 620 },
+          },
+          audio: false,
+        });
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false,
+        });
+      }
+
+      if (!mountedRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+
+      const track = stream.getVideoTracks()[0];
+      const caps = track.getCapabilities?.() as Record<string, unknown> | undefined;
+      if (caps?.focusMode) {
+        try {
+          await track.applyConstraints({ focusMode: "continuous" } as MediaTrackConstraints);
+        } catch { /* ignore */ }
+      }
+
+      streamRef.current = stream;
+      const video = videoRef.current;
+      if (!video) return;
+
+      video.srcObject = stream;
+      await video.play();
+      setScanning(false);
+
+      let decoding = false;
+
+      const scan = async () => {
+        if (!mountedRef.current || foundRef.current) return;
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA && !decoding) {
+          decoding = true;
+          try {
+            const result = await decodeQRFromVideo(video);
+            if (result && mountedRef.current && !foundRef.current) {
+              if (handleResult(result)) return;
+            }
+          } catch {
+            // ignore decode errors
+          }
+          decoding = false;
+        }
+
+        if (mountedRef.current && !foundRef.current) {
+          rafRef.current = requestAnimationFrame(scan);
+        }
+      };
+
+      rafRef.current = requestAnimationFrame(scan);
+    } catch (e) {
+      if (mountedRef.current) {
+        const msg = e instanceof Error ? e.message : "Không thể mở camera";
+        const isDenied = e instanceof DOMException && (e.name === "NotAllowedError" || e.name === "PermissionDeniedError");
+        if (isDenied) {
+          setCameraDenied(true);
+          setError(null);
+        } else {
+          setError(msg);
+        }
+        setScanning(false);
+      }
+    }
+  }, [handleResult, stopCamera]);
+
   // Decode QR từ ảnh file (chụp từ camera native hoặc chọn ảnh)
   const handleFileCapture = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
+      // Tắt camera, hiện overlay processing
+      stopCamera();
+      setProcessing(true);
+      setDebugInfo("");
+
       try {
         const bitmap = await createImageBitmap(file);
-        const canvas = document.createElement("canvas");
-        canvas.width = bitmap.width;
-        canvas.height = bitmap.height;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(bitmap, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const result = await decodeQRFromImage(bitmap);
 
-        const jsQR = (await import("jsqr")).default;
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "attemptBoth",
-        });
-
-        if (code?.data) {
-          handleResult(code.data);
+        if (result) {
+          handleResult(result);
         } else {
-          setDebugInfo("Không tìm thấy QR trong ảnh. Thử chụp rõ hơn.");
+          setDebugInfo("Không tìm thấy QR trong ảnh. Thử chụp rõ hơn, đảm bảo QR code không bị mờ hoặc che khuất.");
+          // Mở lại camera
+          startCamera();
         }
       } catch (err) {
         console.error("File decode error:", err);
         setDebugInfo("Lỗi đọc ảnh: " + (err instanceof Error ? err.message : "unknown"));
+        // Mở lại camera
+        startCamera();
       }
 
       e.target.value = "";
     },
-    [handleResult]
+    [handleResult, stopCamera, startCamera]
   );
 
   useEffect(() => {
     if (!open) return;
 
-    let mounted = true;
+    mountedRef.current = true;
     foundRef.current = false;
     setError(null);
-    setScanning(true);
     setDebugInfo("");
+    setCameraDenied(false);
 
-    const init = async () => {
-      try {
-        const jsQRFn = (await import("jsqr")).default;
+    startCamera();
 
-        // Yêu cầu camera HD + autofocus liên tục
-        let stream: MediaStream;
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { exact: "environment" },
-              width: { ideal: 1920, min: 1280 },
-              height: { ideal: 1080, min: 620 },
-            },
-            audio: false,
-          });
-        } catch {
-          // Fallback nếu exact: environment fail
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
-            audio: false,
-          });
-        }
-
-        if (!mounted) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-
-        // Bật autofocus liên tục nếu có
-        const track = stream.getVideoTracks()[0];
-        const caps = track.getCapabilities?.() as Record<string, unknown> | undefined;
-        if (caps?.focusMode) {
-          try {
-            await track.applyConstraints({
-              focusMode: "continuous",
-            } as MediaTrackConstraints);
-          } catch { /* ignore */ }
-        }
-
-        streamRef.current = stream;
-        const video = videoRef.current;
-        if (!video) return;
-
-        video.srcObject = stream;
-        await video.play();
-        setScanning(false);
-
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        if (!ctx) return;
-
-        let frameCount = 0;
-
-        const scan = () => {
-          if (!mounted || foundRef.current) return;
-
-          if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            frameCount++;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQRFn(imageData.data, imageData.width, imageData.height, {
-              inversionAttempts: "attemptBoth",
-            });
-
-            if (code?.data && mounted && !foundRef.current) {
-              if (handleResult(code.data)) return;
-            }
-
-            if (frameCount % 60 === 0 && mounted) {
-              setDebugInfo(
-                `Đang quét... (${frameCount} frames, ${canvas.width}x${canvas.height})`
-              );
-            }
-          }
-
-          rafRef.current = requestAnimationFrame(scan);
-        };
-
-        rafRef.current = requestAnimationFrame(scan);
-      } catch (e) {
-        if (mounted) {
-          setError(e instanceof Error ? e.message : "Không thể mở camera");
-          setScanning(false);
-        }
-      }
-    };
-
-    init();
     return () => {
-      mounted = false;
+      mountedRef.current = false;
       stopCamera();
     };
-  }, [open, onScanAction, onCloseAction, stopCamera, handleResult]);
+  }, [open, stopCamera, startCamera]);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onCloseAction()}>
@@ -206,39 +202,65 @@ export function CCCDQRScanner({ open, onCloseAction, onScanAction }: CCCDQRScann
           <DialogTitle>Quét QR CCCD</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="relative w-full rounded-lg bg-neutral-900 overflow-hidden max-h-96 " style={{ minHeight: 280 }}>
-            <video
-              ref={videoRef}
-              className="w-full h-auto"
-              playsInline
-              muted
-              style={{ display: "block" }}
-            />
-            <canvas ref={canvasRef} className="hidden" />
-            {/* Khung scan overlay */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="border-2 border-white/60 rounded-lg" style={{ width: "80%", height: "80%" }} />
+          {!cameraDenied && (
+            <div className="relative w-full rounded-lg bg-neutral-900 overflow-hidden max-h-96 " style={{ minHeight: 280 }}>
+              <video
+                ref={videoRef}
+                className="w-full h-auto"
+                playsInline
+                muted
+                style={{ display: processing ? "none" : "block" }}
+              />
+              {/* Khung scan overlay */}
+              {!processing && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="border-2 border-white/60 rounded-lg" style={{ width: "80%", height: "80%" }} />
+                </div>
+              )}
+              {/* Processing overlay */}
+              {processing && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-neutral-900">
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                  <p className="text-sm text-white/80">Đang phân tích ảnh...</p>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
-          {/* {debugInfo && (
+          {cameraDenied && (
+            <div className="flex flex-col items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 py-8 px-4 gap-2">
+              {processing ? (
+                <>
+                  <Loader2 className="w-8 h-8 text-neutral-400 animate-spin" />
+                  <p className="text-sm text-neutral-500">Đang phân tích ảnh...</p>
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="w-10 h-10 text-neutral-400" />
+                  <p className="text-sm text-neutral-500 text-center">
+                    Không có quyền truy cập camera. Chọn ảnh có mã QR bên dưới.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
+          {debugInfo && (
             <p className="text-xs text-neutral-400 font-mono break-all">{debugInfo}</p>
-          )} */}
+          )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
-          {scanning && !error && (
+          {scanning && !error && !cameraDenied && (
             <p className="text-sm text-neutral-500">
               Đang mở camera... Đưa mã QR trên CCCD vào khung hình
             </p>
           )}
 
-          {/* Nút chụp ảnh - dùng native camera app để chụp ảnh rõ nét hơn */}
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            capture="environment"
             className="hidden"
             onChange={handleFileCapture}
           />
@@ -250,8 +272,8 @@ export function CCCDQRScanner({ open, onCloseAction, onScanAction }: CCCDQRScann
               className="flex-1"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Camera className="w-4 h-4 mr-2" />
-              Chụp ảnh QR
+              <ImageIcon className="w-4 h-4 mr-2" />
+              Chọn ảnh QR
             </Button>
             <Button type="button" variant="outline" className="flex-1" onClick={onCloseAction}>
               Đóng
