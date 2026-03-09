@@ -209,7 +209,7 @@ export default function SalaryReportPage() {
 
   return (
     <div className="space-y-6">
-      <HeaderActions>
+      {/* <HeaderActions>
         {!finalized && rows.length > 0 && (
           <Button size="sm" onClick={() => setShowConfirm(true)} disabled={finalizing}>
             <Lock className="mr-2 h-4 w-4" />
@@ -226,7 +226,7 @@ export default function SalaryReportPage() {
           <Download className="mr-2 h-4 w-4" />
           Xuất CSV
         </Button>
-      </HeaderActions>
+      </HeaderActions> */}
 
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
@@ -260,12 +260,12 @@ export default function SalaryReportPage() {
             </SelectContent>
           </Select>
         </div>
-        {finalized && (
+        {/* {finalized && (
           <Badge variant="outline" className="mb-1 bg-emerald-50 text-emerald-700 border-emerald-200">
             <CheckCircle className="mr-1 h-3 w-3" />
             Đã chốt lương
           </Badge>
-        )}
+        )} */}
       </div>
 
       {/* Summary cards */}
@@ -294,17 +294,7 @@ export default function SalaryReportPage() {
             <div className="text-2xl font-bold">{rows.length}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-500">
-              Ngày công TB
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-neutral-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{avgDays.toFixed(1)}</div>
-          </CardContent>
-        </Card>
+
       </div>
 
       {/* Table */}
