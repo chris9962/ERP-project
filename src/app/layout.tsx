@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
 
 export const metadata: Metadata = {
-  title: "LEGIFood - Quản lý Doanh nghiệp",
-  description: "LEGIFood - Hệ thống quản lý nhân sự và chấm công",
+  title: "LEGI Food - Quản lý Doanh nghiệp",
+  description: "LEGI Food - Hệ thống quản lý nhân sự và chấm công",
   icons: {
     icon: [
       { url: `${baseUrl}/logo/logo.jpeg`, type: "image/jpeg" },

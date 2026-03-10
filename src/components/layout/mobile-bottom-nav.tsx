@@ -178,10 +178,10 @@ export function MobileBottomNav() {
                   onClick={() => setScannerOpen(true)}
                   className="flex flex-col items-center -mt-4"
                 >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-lg">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg">
                     <ScanLine className="h-6 w-6" />
                   </div>
-                  <span className="mt-0.5 text-[10px] font-medium text-neutral-900">
+                  <span className="mt-0.5 text-[10px] font-medium text-primary">
                     {item.label}
                   </span>
                 </button>
@@ -196,7 +196,7 @@ export function MobileBottomNav() {
                 onClick={() => router.push(item.href)}
                 className={cn(
                   "flex flex-col items-center py-2 px-1 min-w-[56px]",
-                  active ? "text-neutral-900" : "text-neutral-400",
+                  active ? "text-primary" : "text-neutral-400",
                 )}
               >
                 <Icon className="h-5 w-5" />

@@ -57,7 +57,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
           <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
             <Image
               src="/logo/logo.jpeg"
-              alt="LEGIFood"
+              alt="LEGI Food"
               fill
               className="object-cover"
               sizes="32px"
@@ -66,7 +66,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
           </div>
           {(!collapsed || mobileOpen) && (
             <span className="text-base font-semibold tracking-tight text-neutral-900">
-              LEGIFood
+              LEGI Food
             </span>
           )}
         </Link>
@@ -110,8 +110,8 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-neutral-900 text-white"
-                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+                    ? "bg-primary text-white"
+                    : "text-neutral-600 hover:bg-primary-light hover:text-primary",
                 )}
               >
                 <item.icon className="h-[18px] w-[18px] shrink-0" />

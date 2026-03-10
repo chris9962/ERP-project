@@ -7,6 +7,10 @@
   --muted-foreground: #737373;
   --border: #e5e5e5;
   --sidebar-width: 260px;
+  --primary: #D97B3D;
+  --primary-hover: #C26A30;
+  --primary-foreground: #ffffff;
+  --primary-light: #FDF3ED;
 }
 
 @theme inline {
@@ -16,6 +20,10 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-sidebar-width: var(--sidebar-width);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-light: var(--primary-light);
 }
 
 body {
