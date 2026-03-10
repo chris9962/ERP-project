@@ -23,6 +23,7 @@ import AvatarUpload from "@/components/employees/avatar-upload";
 
 function generateEmail(fullName: string): string {
   if (!fullName.trim()) return "";
+  const prefix = process.env.NEXT_PUBLIC_COMPANY_EMAIL_PREFIX || "company";
   // Normalize Vietnamese characters to ASCII
   const normalized = fullName
     .normalize("NFD")
@@ -33,10 +34,10 @@ function generateEmail(fullName: string): string {
     .trim();
   const parts = normalized.split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "";
-  // Last name initials + first name: "nguyen van cuong" -> "nvcuong"
-  const lastName = parts.slice(0, -1).map((p) => p[0]).join("");
+  // "Lê Vĩnh Phát" -> "legifood.phatlv@gmail.com"
   const firstName = parts[parts.length - 1];
-  return `${lastName}${firstName}@legifood.com`;
+  const lastNameInitials = parts.slice(0, -1).map((p) => p[0]).join("");
+  return `${prefix}.${firstName}${lastNameInitials}@gmail.com`;
 }
 
 export default function NewEmployeePage() {
