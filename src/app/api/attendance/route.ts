@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { sendTelegramMessage, buildAttendanceSummary } from "@/lib/telegram";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -76,5 +77,35 @@ export async function POST(request: Request) {
       ? await supabase.from("attendance").insert(toUpsert)
       : { error: null };
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  if (toUpsert.length > 0) {
+    const empRes = await supabase
+      .from("employees")
+      .select("id, full_name, department")
+      .eq("status", "active")
+      .lte("start_date", date)
+      .order("employee_code");
+
+    const profileRes = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user?.id ?? "")
+      .single();
+
+    const allEmployees = empRes.data ?? [];
+    const notedByName = profileRes.data?.full_name || "Hệ thống";
+
+    const message = buildAttendanceSummary({
+      date,
+      entries: entries ?? [],
+      employees: allEmployees,
+      notedByName,
+    });
+
+    sendTelegramMessage(message).catch((err) =>
+      console.error("[Telegram] Background send error:", err),
+    );
+  }
+
   return NextResponse.json({ ok: true });
 }
