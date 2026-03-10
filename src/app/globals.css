@@ -55,15 +55,52 @@ body {
   animation: loadingBar 1s ease-in-out infinite;
 }
 
-/* Đồng bộ chiều cao input date với các input/select khác */
 input[type="date"] {
   appearance: none;
   -webkit-appearance: none;
-  min-height: 2.5rem; /* h-10 = 40px */
+  min-height: 2.5rem;
   box-sizing: border-box;
 }
 
-/* Scanner CCCD: đảm bảo video từ html5-qrcode hiển thị */
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--background);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+input[type="radio"]:checked {
+  border-color: var(--primary);
+}
+
+input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+input[type="radio"]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+input[type="radio"]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .cccd-scanner-reader video {
   width: 100% !important;
   max-height: 320px;

@@ -226,7 +226,7 @@ export default function AttendancePage() {
     fetchData();
   }
 
-  // const totalAttended = Object.values(entries).filter((e) => e.value != null && e.value > 0).length;
+  const totalMarked = Object.values(entries).filter((e) => e.value != null).length;
   const countByValue = valueOptions.reduce(
     (acc, opt) => {
       acc[opt.value] = Object.values(entries).filter((e) => e.value === opt.value).length;
@@ -235,15 +235,15 @@ export default function AttendancePage() {
     {} as Record<number, number>,
   );
   const summaryLabels: Record<number, string> = {
-    0.5: "ngày làm nửa ngày",
-    1: "ngày đủ ngày",
+    0.5: "nửa ngày",
+    1: "đủ ngày",
     1.5: "tăng ca",
     0: "vắng",
   };
-  const summaryParts = valueOptions
+  const summaryDetail = valueOptions
     .filter((opt) => countByValue[opt.value] > 0)
-    .map((opt) => `${countByValue[opt.value]} ${summaryLabels[opt.value]}`);
-  const summaryText = summaryParts.length > 0 ? summaryParts.join(" · ") : "Chưa điểm danh";
+    .map((opt) => `${countByValue[opt.value]} ${summaryLabels[opt.value]}`)
+    .join(" · ");
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -382,6 +382,19 @@ export default function AttendancePage() {
         </div>
       </div>
 
+      {!loading && employees.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-neutral-200 bg-white px-4 py-3">
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-bold text-primary">{totalMarked}</span>
+            <span className="text-neutral-400">/ {employees.length}</span>
+            <span className="ml-1 text-sm text-neutral-500">đã điểm danh</span>
+          </div>
+          {summaryDetail && (
+            <span className="text-xs text-neutral-400">({summaryDetail})</span>
+          )}
+        </div>
+      )}
+
       <div className="hidden md:block overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         <Table>
           <TableHeader>
@@ -439,7 +452,7 @@ export default function AttendancePage() {
                           name={`attendance-table-${emp.id}`}
                           checked={entry?.value != null && Number(entry.value) === opt.value}
                           onChange={() => updateValue(emp.id, opt.value)}
-                          className="h-4 w-4 cursor-pointer accent-neutral-900"
+                          className="cursor-pointer"
                         />
                       </TableCell>
                     ))}
@@ -504,7 +517,7 @@ export default function AttendancePage() {
                         name={`attendance-card-${emp.id}`}
                         checked={entry?.value != null && Number(entry.value) === opt.value}
                         onChange={() => updateValue(emp.id, opt.value)}
-                        className="h-4 w-4 accent-neutral-900"
+                        className="cursor-pointer"
                       />
                       {opt.label}
                     </label>

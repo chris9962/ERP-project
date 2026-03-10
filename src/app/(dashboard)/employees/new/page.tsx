@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScanLine } from "lucide-react";
+import { ScanLine, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
@@ -67,6 +67,7 @@ export default function NewEmployeePage() {
   const [salaryAmount, setSalaryAmount] = useState("");
   const [roleName, setRoleName] = useState("worker");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [roleOptions, setRoleOptions] = useState<{ name: string; label: string | null }[]>([]);
 
@@ -304,15 +305,26 @@ export default function NewEmployeePage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Mật khẩu *</Label>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Tối thiểu 6 ký tự"
-                    required
-                    minLength={6}
-                    autoComplete="new-password"
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Tối thiểu 6 ký tự"
+                      required
+                      minLength={6}
+                      autoComplete="new-password"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-0 top-0 flex h-10 w-10 items-center justify-center text-neutral-400 hover:text-neutral-600"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

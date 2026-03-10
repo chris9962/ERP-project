@@ -81,21 +81,25 @@ export default function DashboardPage() {
             <CardContent>
               {loading ? (
                 <div className="text-neutral-400">—</div>
-              ) : lines.length === 0 && counts.notMarked === totalEmployees ? (
-                <p className="text-sm text-neutral-500">Chưa điểm danh</p>
               ) : (
-                <ul className="space-y-1.5 text-sm">
-                  {lines.map(({ count, label }) => (
-                    <li key={label}>
-                      <span className="font-semibold">{count}</span> {label}
-                    </li>
-                  ))}
-                  {counts.notMarked > 0 && (
-                    <li className="text-neutral-500">
-                      <span className="font-semibold">{counts.notMarked}</span> chưa điểm danh
-                    </li>
+                <div className="space-y-3">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-primary">
+                      {totalEmployees - counts.notMarked}
+                    </span>
+                    <span className="text-lg text-neutral-400">/ {totalEmployees}</span>
+                    <span className="ml-1 text-sm text-neutral-500">đã điểm danh</span>
+                  </div>
+                  {lines.length > 0 && (
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-500">
+                      {lines.map(({ count, label }) => (
+                        <span key={label}>
+                          <span className="font-semibold text-neutral-700">{count}</span> {label}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                </ul>
+                </div>
               )}
             </CardContent>
           </Card>

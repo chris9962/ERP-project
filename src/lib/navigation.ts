@@ -54,7 +54,7 @@ const PAGES: PageConfig[] = [
     roles: ["admin", "owner", "manager"],
     description: "Điểm danh hôm nay",
     homeGroup: null,
-    showInSidebar: false,
+    showInSidebar: true,
   },
   {
     id: PAGE_IDS.ATTENDANCE,
