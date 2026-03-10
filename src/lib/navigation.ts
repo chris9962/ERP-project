@@ -157,5 +157,5 @@ export function getPageTitleForPath(pathname: string): string {
   const page = sorted.find(
     (p) => pathname === p.href || pathname.startsWith(p.href + "/"),
   );
-  return page ? (page.sidebarLabel ?? page.name) : "LegiFood";
+  return page ? (page.sidebarLabel ?? page.name) : "LEGIFood";
 }
