@@ -22,7 +22,9 @@ export async function GET() {
 
   const list = profiles.map((p) => ({
     ...p,
-    roles: p.role_id ? { name: rolesMap.get(p.role_id)?.name ?? null } : null,
+    roles: p.role_id
+      ? { name: rolesMap.get(p.role_id)?.name ?? null, label: rolesMap.get(p.role_id)?.label ?? null }
+      : null,
   }));
   return NextResponse.json(list);
 }

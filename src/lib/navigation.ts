@@ -7,6 +7,7 @@ import {
   BarChart3,
   DollarSign,
   UserCog,
+  Shield,
 } from "lucide-react";
 
 export const PAGE_IDS = {
@@ -17,6 +18,7 @@ export const PAGE_IDS = {
   REPORT_ATTENDANCE: "report-attendance",
   REPORT_SALARY: "report-salary",
   ADMIN_USERS: "admin-users",
+  ADMIN_ROLES: "admin-roles",
 } as const;
 
 export type PageId = (typeof PAGE_IDS)[keyof typeof PAGE_IDS];
@@ -102,6 +104,16 @@ const PAGES: PageConfig[] = [
     icon: UserCog,
     roles: ["admin"],
     description: "Tài khoản đăng nhập hệ thống",
+    homeGroup: "he-thong",
+    showInSidebar: true,
+  },
+  {
+    id: PAGE_IDS.ADMIN_ROLES,
+    name: "Quản lý Role",
+    href: "/admin/roles",
+    icon: Shield,
+    roles: ["admin"],
+    description: "Quản lý vai trò hệ thống",
     homeGroup: "he-thong",
     showInSidebar: true,
   },

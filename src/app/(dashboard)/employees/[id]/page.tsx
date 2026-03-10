@@ -26,10 +26,9 @@ import {
 import LoadingBars from "@/components/ui/loading-bars";
 import { Pencil, User } from "lucide-react";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
-import { getRoleLabel, EMPLOYEE_ROLE_OPTIONS } from "@/lib/utils";
 import AvatarUpload from "@/components/employees/avatar-upload";
 
-type Role = { id: string; name: string };
+type Role = { id: string; name: string; label: string | null };
 type Employee = {
   id: string;
   profile_id: string;
@@ -45,7 +44,7 @@ type Employee = {
   department: string | null;
   salary_amount: number | null;
   avatar_url: string | null;
-  profiles: { full_name: string | null; email: string | null; role_id: string | null; roles: { name: string } | null } | null;
+  profiles: { full_name: string | null; email: string | null; role_id: string | null; roles: { name: string; label: string | null } | null } | null;
 };
 type AttendanceRecord = {
   id: string;
@@ -319,18 +318,16 @@ export default function EmployeeDetailPage() {
                         <SelectValue placeholder="Chọn vai trò" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roles
-                          .filter((r) => EMPLOYEE_ROLE_OPTIONS.some((o) => o.value === r.name))
-                          .map((r) => (
+                        {roles.map((r) => (
                             <SelectItem key={r.id} value={r.id}>
-                              {getRoleLabel(r.name)}
+                              {r.label || r.name}
                             </SelectItem>
                           ))}
                       </SelectContent>
                     </Select>
                   ) : (
                     <p className="text-sm">
-                      {getRoleLabel(employee.profiles?.roles?.name)}
+                      {employee.profiles?.roles?.label || employee.profiles?.roles?.name || "—"}
                     </p>
                   )}
                 </div>

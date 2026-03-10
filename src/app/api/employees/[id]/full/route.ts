@@ -10,7 +10,7 @@ export async function GET(
   const [empRes, attRes, rolesRes] = await Promise.all([
     supabase
       .from("employees")
-      .select("*, profiles(full_name, email, role_id, roles(name))")
+      .select("*, profiles(full_name, email, role_id, roles(name, label))")
       .eq("id", id)
       .single(),
     supabase
@@ -19,7 +19,7 @@ export async function GET(
       .eq("employee_id", id)
       .order("date", { ascending: false })
       .limit(30),
-    supabase.from("roles").select("id, name").order("name"),
+    supabase.from("roles").select("id, name, label").order("name"),
   ]);
   if (empRes.error)
     return NextResponse.json({ error: empRes.error.message }, { status: 500 });

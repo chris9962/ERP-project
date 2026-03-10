@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ import { ScanLine } from "lucide-react";
 import Link from "next/link";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
-import { EMPLOYEE_ROLE_OPTIONS } from "@/lib/utils";
 import AvatarUpload from "@/components/employees/avatar-upload";
 
 function generateEmail(fullName: string): string {
@@ -69,6 +68,13 @@ export default function NewEmployeePage() {
   const [roleName, setRoleName] = useState("worker");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [roleOptions, setRoleOptions] = useState<{ name: string; label: string | null }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/roles", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setRoleOptions(data));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -235,9 +241,9 @@ export default function NewEmployeePage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {EMPLOYEE_ROLE_OPTIONS.map((r) => (
-                      <SelectItem key={r.value} value={r.value}>
-                        {r.label}
+                    {roleOptions.map((r) => (
+                      <SelectItem key={r.name} value={r.name}>
+                        {r.label || r.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

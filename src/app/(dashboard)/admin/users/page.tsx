@@ -31,7 +31,7 @@ import LoadingBars from "@/components/ui/loading-bars";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { HeaderActions } from "@/components/layout/header-actions";
 
-type Role = { id: string; name: string; description: string | null };
+type Role = { id: string; name: string; label: string | null; description: string | null };
 type UserProfile = {
   id: string;
   full_name: string | null;
@@ -39,7 +39,7 @@ type UserProfile = {
   phone: string | null;
   is_active: boolean;
   role_id: string | null;
-  roles: { name: string } | null;
+  roles: { name: string; label: string | null } | null;
   created_at: string;
 };
 
@@ -249,7 +249,7 @@ export default function AdminUsersPage() {
                   <SelectContent>
                     {roles.map((r) => (
                       <SelectItem key={r.id} value={r.id}>
-                        {r.name}
+                        {r.label || r.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -325,7 +325,7 @@ export default function AdminUsersPage() {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {(user.roles as { name: string } | null)?.name || "N/A"}
+                      {user.roles?.label || user.roles?.name || "N/A"}
                     </Badge>
                   </TableCell>
                   <TableCell>
