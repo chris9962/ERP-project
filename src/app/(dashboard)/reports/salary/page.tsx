@@ -26,10 +26,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Download, DollarSign, Users, TrendingUp, Lock, Unlock, CheckCircle, Pencil } from "lucide-react";
+import { Download, DollarSign, Users, TrendingUp, Lock, Unlock, CheckCircle, Pencil, StickyNote } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type SalaryRow = {
   employee_id: string;
@@ -90,7 +91,7 @@ export default function SalaryReportPage() {
   }
 
   function exportCSV() {
-    const headers = ["Họ tên", "Loại", "Lương cơ bản", "Ngày công", "Thưởng", "Tổng lương"];
+    const headers = ["Họ tên", "Loại", "Lương cơ bản", "Ngày công", "Thưởng/Phạt", "Ghi chú", "Tổng lương"];
     const csvRows = [
       headers.join(","),
       ...rows.map((r) =>
@@ -100,6 +101,7 @@ export default function SalaryReportPage() {
           r.salary_amount,
           r.total_days,
           r.bonus,
+          `"${(r.note || "").replace(/"/g, '""')}"`,
           Math.round(r.total_salary + r.bonus),
         ].join(","),
       ),
@@ -209,7 +211,7 @@ export default function SalaryReportPage() {
 
   return (
     <div className="space-y-6">
-      {/* <HeaderActions>
+      <HeaderActions>
         {!finalized && rows.length > 0 && (
           <Button size="sm" onClick={() => setShowConfirm(true)} disabled={finalizing}>
             <Lock className="mr-2 h-4 w-4" />
@@ -226,7 +228,7 @@ export default function SalaryReportPage() {
           <Download className="mr-2 h-4 w-4" />
           Xuất CSV
         </Button>
-      </HeaderActions> */}
+      </HeaderActions>
 
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
@@ -260,12 +262,12 @@ export default function SalaryReportPage() {
             </SelectContent>
           </Select>
         </div>
-        {/* {finalized && (
+        {finalized && (
           <Badge variant="outline" className="mb-1 bg-emerald-50 text-emerald-700 border-emerald-200">
             <CheckCircle className="mr-1 h-3 w-3" />
             Đã chốt lương
           </Badge>
-        )} */}
+        )}
       </div>
 
       {/* Summary cards */}
@@ -306,7 +308,7 @@ export default function SalaryReportPage() {
               <TableHead>Loại</TableHead>
               <TableHead className="text-right">Lương cơ bản</TableHead>
               <TableHead className="text-right">Ngày công</TableHead>
-              <TableHead className="text-right">Thưởng</TableHead>
+              <TableHead className="text-right">Thưởng/Phạt</TableHead>
               <TableHead className="text-right">Tổng lương</TableHead>
               <TableHead className="w-[50px]" />
             </TableRow>
@@ -343,7 +345,23 @@ export default function SalaryReportPage() {
                       {r.total_days}
                     </TableCell>
                     <TableCell className="text-right">
-                      {r.bonus ? formatCurrency(r.bonus) : "—"}
+                      <div className="flex items-center justify-end gap-1.5">
+                        <span className={r.bonus < 0 ? "text-red-600" : r.bonus > 0 ? "text-emerald-600" : ""}>
+                          {r.bonus ? formatCurrency(r.bonus) : "—"}
+                        </span>
+                        {r.note && (
+                          <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <StickyNote className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-[240px]">
+                                <p className="text-xs">{r.note}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(r.total_salary + r.bonus)}
@@ -387,7 +405,7 @@ export default function SalaryReportPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1">
-              <label className="text-sm font-medium">Thưởng (VNĐ)</label>
+              <label className="text-sm font-medium">Thưởng/Phạt (VNĐ)</label>
               <Input
                 type="number"
                 value={editBonus}
