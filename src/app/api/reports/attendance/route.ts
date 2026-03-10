@@ -5,12 +5,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const fromDate = searchParams.get("from");
   const toDate = searchParams.get("to");
-  const departmentId = searchParams.get("departmentId");
+  const department = searchParams.get("department");
 
   const supabase = await createClient();
   const { data: employees } = await supabase
     .from("employees")
-    .select("id, employee_code, full_name, department_id, departments(name)")
+    .select("id, employee_code, full_name, department")
     .eq("status", "active");
 
   if (!employees?.length) return NextResponse.json([]);
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   }> = [];
 
   for (const emp of employees) {
-    if (departmentId && departmentId !== "all" && emp.department_id !== departmentId) continue;
+    if (department && department !== "all" && emp.department !== department) continue;
 
     const { data: attendance } = await supabase
       .from("attendance")
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       employee_id: emp.id,
       employee_code: emp.employee_code || "",
       full_name: emp.full_name || "",
-      department_name: (emp.departments as unknown as { name: string } | null)?.name || "",
+      department_name: emp.department || "",
       total_days: totalDays,
       absent_days: records.filter((a: { value: number }) => a.value === 0).length,
       half_days: records.filter((a: { value: number }) => a.value === 0.5).length,

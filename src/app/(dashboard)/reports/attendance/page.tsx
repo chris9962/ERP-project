@@ -25,8 +25,6 @@ import { Users, AlertTriangle, TrendingUp } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
 
-type Department = { id: string; name: string };
-
 type AttendanceRow = {
   employee_id: string;
   employee_code: string;
@@ -54,7 +52,6 @@ export default function AttendanceReportPage() {
   const pathname = usePathname();
 
   const [rows, setRows] = useState<AttendanceRow[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterDept, setFilterDept] = useState("all");
 
@@ -67,24 +64,12 @@ export default function AttendanceReportPage() {
     toParam && /^\d{4}-\d{2}-\d{2}$/.test(toParam) ? toParam : getLastDayOfMonth(),
   );
 
-  const fetchDepartments = useCallback(async () => {
-    const res = await fetch("/api/departments", { credentials: "include" });
-    if (res.ok) {
-      const data = await res.json();
-      setDepartments(data);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
-
   async function fetchReport() {
     setLoading(true);
     const params = new URLSearchParams({
       from: fromDate,
       to: toDate,
-      departmentId: filterDept,
+      department: filterDept,
     });
     const res = await fetch(`/api/reports/attendance?${params}`, {
       credentials: "include",
@@ -179,9 +164,9 @@ export default function AttendanceReportPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả phòng ban</SelectItem>
-              {departments.map((d) => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.name}
+              {[...new Set(rows.map((r) => r.department_name).filter(Boolean))].map((d) => (
+                <SelectItem key={d} value={d}>
+                  {d}
                 </SelectItem>
               ))}
             </SelectContent>

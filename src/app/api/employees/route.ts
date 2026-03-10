@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("employees")
-    .select("*, departments(name), profiles(full_name, email, roles(name))")
+    .select("*, profiles(full_name, email, roles(name))")
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data ?? []);
@@ -22,7 +22,6 @@ export async function POST(request: Request) {
     address,
     gender,
     employee_code,
-    department_id,
     employment_type,
     start_date,
     status,
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
       address: address || null,
       gender: gender || null,
       employee_code: code,
-      department_id: department_id || null,
+      department: body.department || null,
       employment_type: employment_type ?? "full_time",
       start_date: start_date || null,
       status: status ?? "active",

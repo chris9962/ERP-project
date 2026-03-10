@@ -31,8 +31,7 @@ type Employee = {
   full_name: string | null;
   avatar_url: string | null;
   cccd_number?: string | null;
-  department_id: string | null;
-  departments: { id: string; name: string } | null;
+  department: string | null;
   profiles: { roles: { name: string } | null } | null;
   status: string;
 };
@@ -44,14 +43,11 @@ type AttendanceEntry = {
   existing: boolean;
 };
 
-type Department = { id: string; name: string };
-
 const NOTE_BY_LABEL = "Điểm danh bởi";
 
 export default function AttendancePage() {
   const { profile } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [entries, setEntries] = useState<Record<string, AttendanceEntry>>({});
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [filterDept, setFilterDept] = useState("all");
@@ -76,7 +72,6 @@ export default function AttendancePage() {
     }
     const data = await res.json();
     setEmployees((data.employees || []) as Employee[]);
-    setDepartments(data.departments || []);
     const rawEntries = (data.entries || {}) as Record<string, AttendanceEntry>;
     const defaultNoteVal = `${NOTE_BY_LABEL} ${profile?.full_name || "User"}`;
     const entriesWithNote: Record<string, AttendanceEntry> = {};
@@ -151,7 +146,7 @@ export default function AttendancePage() {
     .filter(
       (emp) =>
         filterDept === "all" ||
-        (emp.departments as { id: string } | null)?.id === filterDept,
+        emp.department === filterDept,
     )
     .filter((emp) => {
       const name = (emp.full_name || "").toLowerCase();
@@ -290,9 +285,9 @@ export default function AttendancePage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả phòng ban</SelectItem>
-              {departments.map((d) => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.name}
+              {[...new Set(employees.map((e) => e.department).filter(Boolean))].map((d) => (
+                <SelectItem key={d!} value={d!}>
+                  {d}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -347,9 +342,9 @@ export default function AttendancePage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả phòng ban</SelectItem>
-              {departments.map((d) => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.name}
+              {[...new Set(employees.map((e) => e.department).filter(Boolean))].map((d) => (
+                <SelectItem key={d!} value={d!}>
+                  {d}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -435,7 +430,7 @@ export default function AttendancePage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-neutral-500">
-                      {emp.departments?.name || "—"}
+                      {emp.department || "—"}
                     </TableCell>
                     {valueOptions.map((opt) => (
                       <TableCell key={opt.value} className="text-center">
@@ -493,7 +488,7 @@ export default function AttendancePage() {
                       {idx + 1}. {emp.full_name || "—"}
                     </p>
                     <p className="text-sm text-neutral-500">
-                      {emp.departments?.name || "—"}
+                      {emp.department || "—"}
                     </p>
                     </div>
                   </div>

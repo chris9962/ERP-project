@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,8 @@ import { ScanLine } from "lucide-react";
 import Link from "next/link";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
+import { EMPLOYEE_ROLE_OPTIONS } from "@/lib/utils";
 import AvatarUpload from "@/components/employees/avatar-upload";
-
-type Department = { id: string; name: string };
 
 function generateEmail(fullName: string): string {
   if (!fullName.trim()) return "";
@@ -43,14 +42,13 @@ function generateEmail(fullName: string): string {
 export default function NewEmployeePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Form - pre-fill from URL params (from QR scan navigation)
   const [fullName, setFullName] = useState(searchParams.get("fullName") || "");
   const [cccdNumber, setCccdNumber] = useState(searchParams.get("cccd") || "");
   const [employeeCode, setEmployeeCode] = useState("");
-  const [departmentId, setDepartmentId] = useState("");
+  const [department, setDepartment] = useState("");
   const [employmentType, setEmploymentType] = useState("full_time");
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split("T")[0],
@@ -70,18 +68,6 @@ export default function NewEmployeePage() {
   const [roleName, setRoleName] = useState("worker");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
-
-  const fetchDepartments = useCallback(async () => {
-    const res = await fetch("/api/departments", { credentials: "include" });
-    if (res.ok) {
-      const data = await res.json();
-      setDepartments(data);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -121,7 +107,7 @@ export default function NewEmployeePage() {
         address: address || null,
         gender: gender || null,
         employee_code: employeeCode || null,
-        department_id: departmentId || null,
+        department: department || null,
         employment_type: employmentType,
         start_date: startDate,
         status: "active",
@@ -248,25 +234,21 @@ export default function NewEmployeePage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="worker">Công nhân</SelectItem>
-                    <SelectItem value="office_staff">Văn phòng</SelectItem>
+                    {EMPLOYEE_ROLE_OPTIONS.map((r) => (
+                      <SelectItem key={r.value} value={r.value}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Phòng ban</Label>
-                <Select value={departmentId} onValueChange={setDepartmentId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn phòng ban" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  placeholder="Nhập tên phòng ban"
+                />
               </div>
             </div>
 

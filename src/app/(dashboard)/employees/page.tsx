@@ -32,7 +32,7 @@ type Employee = {
   status: string;
   start_date: string | null;
   avatar_url: string | null;
-  departments: { name: string } | null;
+  department: string | null;
   profiles: { full_name: string | null; email: string | null; roles: { name: string } | null } | null;
   salary_amount: number | null;
 };
@@ -180,7 +180,7 @@ export default function EmployeesPage() {
                     </button>
                   </TableCell>
                   <TableCell className="text-neutral-500">
-                    {emp.departments?.name || "—"}
+                    {emp.department || "—"}
                   </TableCell>
                   <TableCell className="text-right text-neutral-600">
                     {emp.salary_amount

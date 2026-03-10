@@ -11,14 +11,13 @@ export async function GET(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [empRes, deptRes, attRes] = await Promise.all([
+  const [empRes, attRes] = await Promise.all([
     supabase
       .from("employees")
-      .select("id, employee_code, full_name, avatar_url, cccd_number, department_id, departments(id, name), status, start_date, profiles(roles(name))")
+      .select("id, employee_code, full_name, avatar_url, cccd_number, department, status, start_date, profiles(roles(name))")
       .eq("status", "active")
       .lte("start_date", date)
       .order("employee_code"),
-    supabase.from("departments").select("id, name").order("name"),
     supabase
       .from("attendance")
       .select("employee_id, value, note")
@@ -26,23 +25,7 @@ export async function GET(request: Request) {
   ]);
 
   if (empRes.error) return NextResponse.json({ error: empRes.error.message }, { status: 500 });
-  type EmpFromDb = {
-    id: string;
-    employee_code: string | null;
-    full_name: string | null;
-    cccd_number: string | null;
-    department_id: string | null;
-    departments: { id: string; name: string }[] | null;
-    status: string;
-  };
-  type Employee = Omit<EmpFromDb, "departments"> & {
-    departments: { id: string; name: string } | null;
-  };
-  const raw = (empRes.data ?? []) as EmpFromDb[];
-  const employees: Employee[] = raw.map((emp) => ({
-    ...emp,
-    departments: Array.isArray(emp.departments) ? emp.departments[0] ?? null : emp.departments,
-  }));
+  const employees = empRes.data ?? [];
   const existing = attRes.data ?? [];
 
   // Chuẩn hóa value sang number (Supabase có thể trả về string)
@@ -66,7 +49,6 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     employees,
-    departments: deptRes.data ?? [],
     entries: Object.fromEntries(entries.map((e) => [e.employeeId, e])),
   });
 }

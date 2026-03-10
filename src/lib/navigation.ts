@@ -7,8 +7,6 @@ import {
   BarChart3,
   DollarSign,
   UserCog,
-  Building2,
-  Settings,
 } from "lucide-react";
 
 export const PAGE_IDS = {
@@ -19,8 +17,6 @@ export const PAGE_IDS = {
   REPORT_ATTENDANCE: "report-attendance",
   REPORT_SALARY: "report-salary",
   ADMIN_USERS: "admin-users",
-  ADMIN_DEPARTMENTS: "admin-departments",
-  ADMIN_SALARY_CONFIG: "admin-salary-config",
 } as const;
 
 export type PageId = (typeof PAGE_IDS)[keyof typeof PAGE_IDS];
@@ -108,27 +104,6 @@ const PAGES: PageConfig[] = [
     description: "Tài khoản đăng nhập hệ thống",
     homeGroup: "he-thong",
     showInSidebar: true,
-  },
-  {
-    id: PAGE_IDS.ADMIN_DEPARTMENTS,
-    name: "Quản lý phòng ban",
-    href: "/admin/departments",
-    icon: Building2,
-    roles: ["admin"],
-    description: "Phòng ban, bộ phận",
-    homeGroup: "he-thong",
-    showInSidebar: false,
-    sidebarLabel: "Phòng ban",
-  },
-  {
-    id: PAGE_IDS.ADMIN_SALARY_CONFIG,
-    name: "Cấu hình lương",
-    href: "/admin/salary-config",
-    icon: Settings,
-    roles: ["admin"],
-    description: "Cấu hình lương",
-    homeGroup: null,
-    showInSidebar: false,
   },
 ];
 

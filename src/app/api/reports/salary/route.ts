@@ -50,7 +50,7 @@ export async function GET(request: Request) {
 
   const { data: employees } = await supabase
     .from("employees")
-    .select("id, employee_code, full_name, department_id, employment_type, salary_amount, departments(name)")
+    .select("id, employee_code, full_name, department, employment_type, salary_amount")
     .eq("status", "active")
     .lte("start_date", toDate);
 

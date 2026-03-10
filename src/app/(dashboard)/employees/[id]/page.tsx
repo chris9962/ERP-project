@@ -26,10 +26,10 @@ import {
 import LoadingBars from "@/components/ui/loading-bars";
 import { Pencil, User } from "lucide-react";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
-import { getRoleLabel } from "@/lib/utils";
+import { getRoleLabel, EMPLOYEE_ROLE_OPTIONS } from "@/lib/utils";
 import AvatarUpload from "@/components/employees/avatar-upload";
 
-type Department = { id: string; name: string };
+type Role = { id: string; name: string };
 type Employee = {
   id: string;
   profile_id: string;
@@ -42,10 +42,9 @@ type Employee = {
   employment_type: string;
   status: string;
   start_date: string | null;
-  department_id: string | null;
+  department: string | null;
   salary_amount: number | null;
   avatar_url: string | null;
-  departments: { name: string } | null;
   profiles: { full_name: string | null; email: string | null; role_id: string | null; roles: { name: string } | null } | null;
 };
 type AttendanceRecord = {
@@ -60,7 +59,7 @@ export default function EmployeeDetailPage() {
   const id = params.id as string;
 
   const [employee, setEmployee] = useState<Employee | null>(null);
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -73,11 +72,12 @@ export default function EmployeeDetailPage() {
   const [formDob, setFormDob] = useState("");
   const [formAddress, setFormAddress] = useState("");
   const [formGender, setFormGender] = useState("");
-  const [formDeptId, setFormDeptId] = useState("");
+  const [formDept, setFormDept] = useState("");
   const [formType, setFormType] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const [formSalary, setFormSalary] = useState("");
   const [formAvatarUrl, setFormAvatarUrl] = useState("");
+  const [formRoleId, setFormRoleId] = useState("");
 
   const fetchFull = useCallback(async () => {
     const res = await fetch(`/api/employees/${id}/full`, { credentials: "include" });
@@ -95,13 +95,14 @@ export default function EmployeeDetailPage() {
       setFormDob(emp.dob || "");
       setFormAddress(emp.address || "");
       setFormGender(emp.gender || "");
-      setFormDeptId(emp.department_id || "");
+      setFormDept(emp.department || "");
       setFormType(emp.employment_type);
       setFormStatus(emp.status);
       setFormSalary(String(emp.salary_amount || 0));
       setFormAvatarUrl(emp.avatar_url || "");
+      setFormRoleId(emp.profiles?.role_id || "");
     }
-    setDepartments(data.departments ?? []);
+    setRoles(data.roles ?? []);
     setAttendance(data.attendance ?? []);
     setLoading(false);
   }, [id]);
@@ -122,11 +123,12 @@ export default function EmployeeDetailPage() {
         dob: formDob || null,
         address: formAddress || null,
         gender: formGender || null,
-        department_id: formDeptId || null,
+        department: formDept || null,
         employment_type: formType,
         status: formStatus,
         salary_amount: formSalary,
         avatar_url: formAvatarUrl || null,
+        role_id: formRoleId || null,
       }),
       credentials: "include",
     });
@@ -311,29 +313,38 @@ export default function EmployeeDetailPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Vai trò</Label>
-                  <p className="text-sm">
-                    {getRoleLabel(employee.profiles?.roles?.name)}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Phòng ban</Label>
                   {editing ? (
-                    <Select value={formDeptId} onValueChange={setFormDeptId}>
+                    <Select value={formRoleId} onValueChange={setFormRoleId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn phòng ban" />
+                        <SelectValue placeholder="Chọn vai trò" />
                       </SelectTrigger>
                       <SelectContent>
-                        {departments.map((d) => (
-                          <SelectItem key={d.id} value={d.id}>
-                            {d.name}
-                          </SelectItem>
-                        ))}
+                        {roles
+                          .filter((r) => EMPLOYEE_ROLE_OPTIONS.some((o) => o.value === r.name))
+                          .map((r) => (
+                            <SelectItem key={r.id} value={r.id}>
+                              {getRoleLabel(r.name)}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   ) : (
                     <p className="text-sm">
-                      {(employee.departments as { name: string } | null)
-                        ?.name || "—"}
+                      {getRoleLabel(employee.profiles?.roles?.name)}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Phòng ban</Label>
+                  {editing ? (
+                    <Input
+                      value={formDept}
+                      onChange={(e) => setFormDept(e.target.value)}
+                      placeholder="Nhập tên phòng ban"
+                    />
+                  ) : (
+                    <p className="text-sm">
+                      {employee.department || "—"}
                     </p>
                   )}
                 </div>

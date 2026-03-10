@@ -21,8 +21,6 @@ import {
 import LoadingBars from "@/components/ui/loading-bars";
 
 
-type Department = { id: string; name: string };
-
 type EmployeeFull = {
   id: string;
   profile_id: string;
@@ -35,10 +33,9 @@ type EmployeeFull = {
   employment_type: string;
   status: string;
   start_date: string | null;
-  department_id: string | null;
+  department: string | null;
   salary_amount: number | null;
   avatar_url: string | null;
-  departments: { name: string } | null;
   profiles: {
     full_name: string | null;
     email: string | null;
@@ -63,14 +60,12 @@ export default function QuickEditModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [employee, setEmployee] = useState<EmployeeFull | null>(null);
-  const [departments, setDepartments] = useState<Department[]>([]);
-
   const [formName, setFormName] = useState("");
   const [formCccd, setFormCccd] = useState("");
   const [formDob, setFormDob] = useState("");
   const [formAddress, setFormAddress] = useState("");
   const [formGender, setFormGender] = useState("");
-  const [formDeptId, setFormDeptId] = useState("");
+  const [formDept, setFormDept] = useState("");
   const [formType, setFormType] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const [formSalary, setFormSalary] = useState("");
@@ -86,13 +81,12 @@ export default function QuickEditModal({
         if (!data) return;
         const emp = data.employee as EmployeeFull;
         setEmployee(emp);
-        setDepartments(data.departments ?? []);
         setFormName(emp.full_name || "");
         setFormCccd(emp.cccd_number || "");
         setFormDob(emp.dob || "");
         setFormAddress(emp.address || "");
         setFormGender(emp.gender || "");
-        setFormDeptId(emp.department_id || "");
+        setFormDept(emp.department || "");
         setFormType(emp.employment_type);
         setFormStatus(emp.status);
         setFormSalary(String(emp.salary_amount || 0));
@@ -113,7 +107,7 @@ export default function QuickEditModal({
         dob: formDob || null,
         address: formAddress || null,
         gender: formGender || null,
-        department_id: formDeptId || null,
+        department: formDept || null,
         employment_type: formType,
         status: formStatus,
         salary_amount: formSalary,

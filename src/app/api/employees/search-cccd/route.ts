@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("employees")
-    .select("*, departments(name), profiles(full_name, email, roles(name))")
+    .select("*, profiles(full_name, email, roles(name))")
     .eq("cccd_number", cccd.trim())
     .limit(1)
     .maybeSingle();

@@ -14,7 +14,7 @@ type AttendanceQRModalProps = {
   employee: {
     full_name: string | null;
     employee_code?: string | null;
-    departments?: { name: string } | null;
+    department?: string | null;
   } | null;
   existingAttendance?: { value: number; note: string } | null;
   selectedValue: number | null;
@@ -54,8 +54,8 @@ export function AttendanceQRModal({
               </p>
               <p className="text-sm text-neutral-500">
                 {employee.employee_code && employee.employee_code}
-                {employee.departments?.name &&
-                  `${employee.employee_code ? " · " : ""}${employee.departments.name}`}
+                {employee.department &&
+                  `${employee.employee_code ? " · " : ""}${employee.department}`}
               </p>
             </div>
             {existingAttendance && (

@@ -13,6 +13,12 @@ const ROLE_LABELS: Record<string, string> = {
   admin: "Admin",
 };
 
+export const EMPLOYEE_ROLE_OPTIONS = [
+  { value: "worker", label: "Công nhân" },
+  { value: "office_staff", label: "Văn phòng" },
+  { value: "manager", label: "Quản lý" },
+] as const;
+
 export function getRoleLabel(roleName: string | null | undefined): string {
   if (!roleName) return "—";
   return ROLE_LABELS[roleName] ?? roleName;

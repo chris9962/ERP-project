@@ -9,7 +9,7 @@ export async function GET(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("employees")
-    .select("*, departments(name), profiles(full_name, email)")
+    .select("*, profiles(full_name, email)")
     .eq("id", id)
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -24,7 +24,7 @@ export async function PATCH(
   const { id } = await params;
   const supabase = await createClient();
   const body = await request.json();
-  const { full_name, employee_code, cccd_number, dob, address, gender, department_id, employment_type, status, salary_amount, avatar_url } = body;
+  const { full_name, employee_code, cccd_number, dob, address, gender, department, employment_type, status, salary_amount, avatar_url, role_id } = body;
   const { data, error } = await supabase
     .from("employees")
     .update({
@@ -34,15 +34,24 @@ export async function PATCH(
       ...(dob !== undefined && { dob: dob || null }),
       ...(address !== undefined && { address: address || null }),
       ...(gender !== undefined && { gender: gender || null }),
-      ...(department_id !== undefined && { department_id: department_id || null }),
+      ...(department !== undefined && { department: department || null }),
       ...(employment_type !== undefined && { employment_type }),
       ...(status !== undefined && { status }),
       ...(salary_amount !== undefined && { salary_amount: parseFloat(salary_amount) || 0 }),
       ...(avatar_url !== undefined && { avatar_url: avatar_url || null }),
     })
     .eq("id", id)
-    .select()
+    .select("profile_id")
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Update role_id in profiles table
+  if (role_id !== undefined && data?.profile_id) {
+    await supabase
+      .from("profiles")
+      .update({ role_id: role_id || null })
+      .eq("id", data.profile_id);
+  }
+
   return NextResponse.json(data);
 }
