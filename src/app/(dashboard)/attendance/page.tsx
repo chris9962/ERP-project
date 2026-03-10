@@ -23,13 +23,13 @@ import { Save, Search, EyeOff, ScanLine } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { CCCDQRScanner } from "@/components/cccd-qr-scanner";
 import { HeaderActions } from "@/components/layout/header-actions";
-import { getRoleLabel } from "@/lib/utils";
 import { AttendanceQRModal } from "@/components/attendance-qr-modal";
 
 type Employee = {
   id: string;
   employee_code: string | null;
   full_name: string | null;
+  avatar_url: string | null;
   cccd_number?: string | null;
   department_id: string | null;
   departments: { id: string; name: string } | null;
@@ -393,7 +393,7 @@ export default function AttendancePage() {
             <TableRow>
               <TableHead className="w-[50px]">STT</TableHead>
               <TableHead className="min-w-[120px]">Họ tên</TableHead>
-              <TableHead className="min-w-[100px]">Vai trò</TableHead>
+              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
               <TableHead className="w-[90px] text-center">Nửa ngày</TableHead>
               <TableHead className="w-[90px] text-center">Đủ ngày</TableHead>
               <TableHead className="w-[90px] text-center">Tăng ca</TableHead>
@@ -423,10 +423,19 @@ export default function AttendancePage() {
                   <TableRow key={emp.id}>
                     <TableCell className="text-neutral-400">{idx + 1}</TableCell>
                     <TableCell className="font-medium">
-                      {emp.full_name || "—"}
+                      <div className="flex items-center gap-2">
+                        {emp.avatar_url ? (
+                          <img src={emp.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="h-7 w-7 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-500 shrink-0">
+                            {(emp.full_name || "?")[0]}
+                          </div>
+                        )}
+                        {emp.full_name || "—"}
+                      </div>
                     </TableCell>
                     <TableCell className="text-neutral-500">
-                      {getRoleLabel(emp.profiles?.roles?.name)}
+                      {emp.departments?.name || "—"}
                     </TableCell>
                     {valueOptions.map((opt) => (
                       <TableCell key={opt.value} className="text-center">
@@ -471,13 +480,22 @@ export default function AttendancePage() {
                 className="rounded-lg border border-neutral-200 bg-white p-4 space-y-3"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {emp.avatar_url ? (
+                      <img src={emp.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-500 shrink-0">
+                        {(emp.full_name || "?")[0]}
+                      </div>
+                    )}
+                    <div className="min-w-0">
                     <p className="font-medium text-neutral-900">
                       {idx + 1}. {emp.full_name || "—"}
                     </p>
                     <p className="text-sm text-neutral-500">
-                      {getRoleLabel(emp.profiles?.roles?.name)}
+                      {emp.departments?.name || "—"}
                     </p>
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">

@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -20,10 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Eye, Pencil } from "lucide-react";
+import { Plus, Search, Pencil } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
-import { getRoleLabel } from "@/lib/utils";
 import QuickEditModal from "@/components/employees/quick-edit-modal";
 
 type Employee = {
@@ -33,6 +31,7 @@ type Employee = {
   employment_type: string;
   status: string;
   start_date: string | null;
+  avatar_url: string | null;
   departments: { name: string } | null;
   profiles: { full_name: string | null; email: string | null; roles: { name: string } | null } | null;
   salary_amount: number | null;
@@ -66,30 +65,6 @@ export default function EmployeesPage() {
   function openEdit(id: string) {
     setEditId(id);
     setEditOpen(true);
-  }
-
-  const statusColors: Record<string, string> = {
-    active: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    inactive: "bg-amber-50 text-amber-700 border-amber-200",
-    resigned: "bg-neutral-100 text-neutral-500 border-neutral-200",
-  };
-
-  const statusLabels: Record<string, string> = {
-    active: "Đang làm",
-    inactive: "Tạm nghỉ",
-    resigned: "Đã nghỉ",
-  };
-
-  const typeLabels: Record<string, string> = {
-    full_time: "Toàn thời gian",
-    part_time: "Bán thời gian",
-  };
-
-  function formatCurrency(value: number) {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
   }
 
   const filtered = employees.filter((emp) => {
@@ -157,19 +132,17 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[50px]"></TableHead>
               <TableHead className="min-w-[120px]">Họ tên</TableHead>
-              <TableHead className="min-w-[100px]">Vai trò</TableHead>
-              <TableHead>Loại</TableHead>
+              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
               <TableHead className="text-right">Lương</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Ngày vào làm</TableHead>
-              <TableHead className="w-[100px]" />
+              <TableHead className="w-[80px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8">
+                <TableCell colSpan={5} className="py-8">
                   <div className="flex justify-center">
                     <LoadingBars message="Đang tải..." />
                   </div>
@@ -177,58 +150,49 @@ export default function EmployeesPage() {
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-neutral-400">
+                <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
                   Không có nhân viên nào
                 </TableCell>
               </TableRow>
             ) : (
               filtered.map((emp) => (
                 <TableRow key={emp.id}>
-                  <TableCell className="font-medium">
-                    {emp.full_name || emp.profiles?.full_name || "—"}
-                  </TableCell>
-                  <TableCell className="text-neutral-500">
-                    {getRoleLabel(emp.profiles?.roles?.name)}
+                  <TableCell>
+                    {emp.avatar_url ? (
+                      <img
+                        src={emp.avatar_url}
+                        alt=""
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-500">
+                        {(emp.full_name || "?")[0]}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {typeLabels[emp.employment_type] || emp.employment_type}
-                    </Badge>
+                    <button
+                      type="button"
+                      onClick={() => openEdit(emp.id)}
+                      className="font-medium text-left hover:underline cursor-pointer"
+                    >
+                      {emp.full_name || emp.profiles?.full_name || "—"}
+                    </button>
+                  </TableCell>
+                  <TableCell className="text-neutral-500">
+                    {emp.departments?.name || "—"}
                   </TableCell>
                   <TableCell className="text-right text-neutral-600">
                     {emp.salary_amount
-                      ? `${formatCurrency(emp.salary_amount)}/${emp.employment_type === "part_time" ? "Ca" : "Tháng"}`
+                      ? `${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(emp.salary_amount)}/${emp.employment_type === "part_time" ? "Ca" : "Tháng"}`
                       : "—"}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={statusColors[emp.status] || ""}
-                    >
-                      {statusLabels[emp.status] || emp.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-neutral-500">
-                    {emp.start_date
-                      ? new Date(emp.start_date).toLocaleDateString("vi-VN")
-                      : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => openEdit(emp.id)}
-                      >
+                    <Link href={`/employees/${emp.id}`}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Link href={`/employees/${emp.id}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                      </Link>
-                    </div>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))

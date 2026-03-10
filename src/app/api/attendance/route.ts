@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const [empRes, deptRes, attRes] = await Promise.all([
     supabase
       .from("employees")
-      .select("id, employee_code, full_name, cccd_number, department_id, departments(id, name), status, start_date, profiles(roles(name))")
+      .select("id, employee_code, full_name, avatar_url, cccd_number, department_id, departments(id, name), status, start_date, profiles(roles(name))")
       .eq("status", "active")
       .lte("start_date", date)
       .order("employee_code"),
