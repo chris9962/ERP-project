@@ -7,10 +7,10 @@
   --muted-foreground: #737373;
   --border: #e5e5e5;
   --sidebar-width: 260px;
-  --primary: #D97B3D;
-  --primary-hover: #C26A30;
+  --primary: #F28238;
+  --primary-hover: #D96E28;
   --primary-foreground: #ffffff;
-  --primary-light: #FDF3ED;
+  --primary-light: #FEF3EB;
 }
 
 @theme inline {
