@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = await createClient();
 
   // Only show manager, owner, admin roles in user management
-  const ADMIN_ROLES = ["manager", "owner", "admin"];
+  const ADMIN_ROLES = ["manager", "owner", "admin", "office_staff"];
   const { data: roles } = await supabase.from("roles").select("*").order("name");
   const rolesMap = new Map((roles ?? []).map((r) => [r.id, r]));
   const adminRoleIds = (roles ?? [])

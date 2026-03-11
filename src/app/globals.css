@@ -121,3 +121,12 @@ input[type="radio"]:focus-visible {
 .cccd-scanner-reader > div {
   width: 100%;
 }
+
+/* Docx preview responsive on mobile */
+.docx-preview-container {
+  overflow: hidden;
+}
+.docx-preview-container .docx-preview-wrapper {
+  background: transparent !important;
+  padding: 0 !important;
+}

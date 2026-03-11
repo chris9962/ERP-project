@@ -46,7 +46,7 @@ export function MobileBottomNav() {
   const router = useRouter();
   const { profile, roleName: userRole } = useAuth();
 
-  const ALLOWED_ROLES = ["admin", "owner", "manager"];
+  const ALLOWED_ROLES = ["admin", "owner", "manager", "office_staff"];
   const showNav = userRole && ALLOWED_ROLES.includes(userRole);
 
   const visibleNavItems = NAV_ITEMS.filter((item) => {

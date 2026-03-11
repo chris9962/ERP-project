@@ -53,6 +53,19 @@ export default function ContractPreviewPage() {
           className: "docx-preview",
           inWrapper: true,
         });
+        // Scale down to fit mobile viewport
+        const wrapper = previewRef.current.querySelector<HTMLElement>(".docx-preview-wrapper");
+        const page = wrapper?.querySelector<HTMLElement>("section.docx-preview");
+        if (wrapper && page) {
+          const pageWidth = page.offsetWidth;
+          const viewportWidth = window.innerWidth;
+          if (pageWidth > viewportWidth) {
+            const scale = viewportWidth / pageWidth;
+            wrapper.style.transformOrigin = "top left";
+            wrapper.style.transform = `scale(${scale})`;
+            wrapper.style.width = `${100 / scale}%`;
+          }
+        }
       })
       .catch((err) => {
         setError(err.message || "Lỗi kết nối server");
@@ -78,7 +91,7 @@ export default function ContractPreviewPage() {
           <span className="ml-3 text-neutral-500">Đang tải bản xem trước...</span>
         </div>
       )}
-      <div ref={previewRef} className="mx-auto" />
+      <div ref={previewRef} className="mx-auto docx-preview-container" />
     </div>
   );
 }

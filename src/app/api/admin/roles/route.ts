@@ -9,9 +9,9 @@ export async function GET(request: Request) {
   let query = supabase.from("roles").select("*").order("name");
 
   if (group === "admin") {
-    query = query.in("name", ["manager", "owner", "admin"]);
+    query = query.in("name", ["manager", "owner", "admin", "office_staff"]);
   } else if (group === "employee") {
-    query = query.in("name", ["worker", "office_staff"]);
+    query = query.in("name", ["worker"]);
   }
 
   const { data, error } = await query;
