@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Plus, Search, Pencil } from "lucide-react";
+import { useSort, SortableTableHead } from "@/components/ui/sortable-table-head";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
 import QuickEditModal from "@/components/employees/quick-edit-modal";
@@ -45,8 +46,7 @@ export default function EmployeesPage() {
   const [filterDept, setFilterDept] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const [sortKey, setSortKey] = useState<"full_name" | "department" | "salary">("full_name");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const { sortKey, sortDir, toggleSort } = useSort<"full_name" | "department" | "salary">("full_name");
 
   // Quick edit modal
   const [editId, setEditId] = useState<string | null>(null);
@@ -70,21 +70,6 @@ export default function EmployeesPage() {
     setEditOpen(true);
   }
 
-  function toggleSort(key: typeof sortKey) {
-    if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
-  }
-
-  function SortIcon({ column }: { column: typeof sortKey }) {
-    if (sortKey !== column) return <ArrowUpDown className="ml-1 inline h-3.5 w-3.5 text-neutral-300" />;
-    return sortDir === "asc"
-      ? <ArrowUp className="ml-1 inline h-3.5 w-3.5" />
-      : <ArrowDown className="ml-1 inline h-3.5 w-3.5" />;
-  }
 
   const filtered = employees
     .filter((emp) => {
@@ -165,15 +150,15 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[180px] cursor-pointer select-none" onClick={() => toggleSort("full_name")}>
-                Họ tên <SortIcon column="full_name" />
-              </TableHead>
-              <TableHead className="min-w-[100px] cursor-pointer select-none" onClick={() => toggleSort("department")}>
-                Phòng ban <SortIcon column="department" />
-              </TableHead>
-              <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort("salary")}>
-                Lương <SortIcon column="salary" />
-              </TableHead>
+              <SortableTableHead column="full_name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="min-w-[180px]">
+                Họ tên
+              </SortableTableHead>
+              <SortableTableHead column="department" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="min-w-[100px]">
+                Phòng ban
+              </SortableTableHead>
+              <SortableTableHead column="salary" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right">
+                Lương
+              </SortableTableHead>
               <TableHead className="w-[80px]" />
             </TableRow>
           </TableHeader>

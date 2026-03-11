@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Download, DollarSign, Users, TrendingUp, Lock, Unlock, CheckCircle, Pencil, StickyNote } from "lucide-react";
+import { useSort, SortableTableHead } from "@/components/ui/sortable-table-head";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,8 @@ export default function SalaryReportPage() {
   const [unfinalizing, setUnfinalizing] = useState(false);
 
   // Modal state
+  const { sortKey, sortDir, toggleSort } = useSort<"full_name" | "salary_amount" | "total_days" | "total_salary">("full_name");
+
   const [editRow, setEditRow] = useState<SalaryRow | null>(null);
   const [editBonus, setEditBonus] = useState("");
   const [editNote, setEditNote] = useState("");
@@ -199,6 +202,15 @@ export default function SalaryReportPage() {
     setSaving(false);
   }
 
+  const sortedRows = [...rows].sort((a, b) => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    if (sortKey === "full_name") return dir * a.full_name.localeCompare(b.full_name, "vi");
+    if (sortKey === "salary_amount") return dir * (a.salary_amount - b.salary_amount);
+    if (sortKey === "total_days") return dir * (a.total_days - b.total_days);
+    // total_salary
+    return dir * ((a.total_salary + a.bonus) - (b.total_salary + b.bonus));
+  });
+
   const totalPayroll = rows.reduce((sum, r) => sum + r.total_salary, 0);
   const totalBonus = rows.reduce((sum, r) => sum + r.bonus, 0);
   const avgDays =
@@ -304,12 +316,20 @@ export default function SalaryReportPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[120px]">Họ tên</TableHead>
+              <SortableTableHead column="full_name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="min-w-[120px]">
+                Họ tên
+              </SortableTableHead>
               <TableHead>Loại</TableHead>
-              <TableHead className="text-right">Lương cơ bản</TableHead>
-              <TableHead className="text-right">Ngày công</TableHead>
+              <SortableTableHead column="salary_amount" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right">
+                Lương cơ bản
+              </SortableTableHead>
+              <SortableTableHead column="total_days" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right">
+                Ngày công
+              </SortableTableHead>
               <TableHead className="text-right">Thưởng/Phạt</TableHead>
-              <TableHead className="text-right">Tổng lương</TableHead>
+              <SortableTableHead column="total_salary" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right">
+                Tổng lương
+              </SortableTableHead>
               <TableHead className="w-[50px]" />
             </TableRow>
           </TableHeader>
@@ -330,7 +350,7 @@ export default function SalaryReportPage() {
               </TableRow>
             ) : (
               <>
-                {rows.map((r) => (
+                {sortedRows.map((r) => (
                   <TableRow key={r.employee_id}>
                     <TableCell className="font-medium">{r.full_name}</TableCell>
                     <TableCell>
