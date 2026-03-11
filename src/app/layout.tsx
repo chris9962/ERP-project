@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { brand, brandId } from "@/config/brand";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,14 +17,14 @@ const geistMono = Geist_Mono({
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
 
 export const metadata: Metadata = {
-  title: "LEGI Food - Quản lý Doanh nghiệp",
-  description: "LEGI Food - Hệ thống quản lý nhân sự và chấm công",
+  title: `${brand.name} - Quản lý Doanh nghiệp`,
+  description: `${brand.name} - Hệ thống quản lý nhân sự và chấm công`,
   icons: {
     icon: [
-      { url: `${baseUrl}/logo/logo.jpeg`, type: "image/jpeg" },
-      { url: `${baseUrl}/logo/logo.jpeg`, type: "image/jpeg", sizes: "32x32" },
+      { url: `${baseUrl}${brand.favicon}` },
+      { url: `${baseUrl}${brand.favicon}`, sizes: "32x32" },
     ],
-    apple: [{ url: `${baseUrl}/logo/logo.jpeg`, type: "image/jpeg" }],
+    apple: [{ url: `${baseUrl}${brand.favicon}` }],
   },
 };
 
@@ -33,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <html lang="vi" data-brand={brandId}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>

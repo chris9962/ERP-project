@@ -7,10 +7,20 @@
   --muted-foreground: #737373;
   --border: #e5e5e5;
   --sidebar-width: 260px;
+}
+
+:root[data-brand="legifood"] {
   --primary: #F28238;
   --primary-hover: #D96E28;
   --primary-foreground: #ffffff;
   --primary-light: #FEF3EB;
+}
+
+:root[data-brand="lienhung"] {
+  --primary: #2E7D32;
+  --primary-hover: #1B5E20;
+  --primary-foreground: #ffffff;
+  --primary-light: #E8F5E9;
 }
 
 @theme inline {

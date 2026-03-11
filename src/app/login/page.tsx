@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardDescription, CardContent } from "@/components/ui/card";
+import { brand } from "@/config/brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,8 +44,8 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="relative mx-auto mb-3 h-20 w-20 overflow-hidden rounded-xl bg-neutral-100">
             <Image
-              src="/logo/logo.jpeg"
-              alt="LEGI Food"
+              src={brand.logo}
+              alt={brand.name}
               fill
               className="object-cover"
               sizes="80px"

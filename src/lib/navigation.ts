@@ -1,3 +1,4 @@
+import { brand } from "@/config/brand";
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
@@ -181,5 +182,5 @@ export function getPageTitleForPath(pathname: string): string {
   const page = sorted.find(
     (p) => pathname === p.href || pathname.startsWith(p.href + "/"),
   );
-  return page ? (page.sidebarLabel ?? page.name) : "LEGI Food";
+  return page ? (page.sidebarLabel ?? page.name) : brand.name;
 }

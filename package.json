@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "cp .env .env.local && next dev",
+    "dev:legi": "cp .env.legi .env.local && next dev",
+    "dev:lienhung": "cp .env.lienhung .env.local && next dev",
     "build": "next build",
+    "build:legi": "cp .env.legi .env.local && next build",
+    "build:lienhung": "cp .env.lienhung .env.local && next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\""

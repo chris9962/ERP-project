@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, LogOut, X } from "lucide-react";
 import { getSidebarPages } from "@/lib/navigation";
+import { brand } from "@/config/brand";
 
 type SidebarProps = {
   mobileOpen?: boolean;
@@ -54,19 +55,28 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
       {/* Logo + collapse / close */}
       <div className="flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2.5" onClick={onCloseAction}>
-          <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+          <div
+            className={cn(
+              "relative shrink-0 overflow-hidden",
+              brand.showSidebarName && "rounded-lg bg-neutral-100",
+            )}
+            style={{
+              height: brand.showSidebarName ? 36 : 28,
+              width: brand.showSidebarName ? 36 : 120,
+            }}
+          >
             <Image
-              src="/logo/logo.jpeg"
-              alt="LEGI Food"
+              src={brand.logo}
+              alt={brand.name}
               fill
-              className="object-cover"
-              sizes="32px"
+              className="object-contain"
+              sizes={`${Math.round(32 * brand.logoRatio)}px`}
               priority
             />
           </div>
-          {(!collapsed || mobileOpen) && (
+          {brand.showSidebarName && (!collapsed || mobileOpen) && (
             <span className="text-base font-semibold tracking-tight text-neutral-900">
-              LEGI Food
+              {brand.name}
             </span>
           )}
         </Link>
