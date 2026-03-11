@@ -21,14 +21,14 @@ export async function GET() {
     return NextResponse.json({ user, profile: null });
   }
 
-  let roles: { name: string } | null = null;
+  let roles: { name: string; label: string | null } | null = null;
   if (profileData.role_id) {
     const { data: roleData } = await supabase
       .from("roles")
-      .select("name")
+      .select("name, label")
       .eq("id", profileData.role_id)
       .single();
-    if (roleData) roles = { name: roleData.name };
+    if (roleData) roles = { name: roleData.name, label: roleData.label };
   }
 
   const profile = { ...profileData, roles };

@@ -13,13 +13,14 @@ type Profile = {
   avatar_url: string | null;
   role_id: string | null;
   is_active: boolean;
-  roles: { name: string } | null;
+  roles: { name: string; label: string | null } | null;
 };
 
 type AuthContextType = {
   user: User | null;
   profile: Profile | null;
   roleName: string | null;
+  roleLabel: string | null;
   loading: boolean;
   signOut: () => Promise<void>;
 };
@@ -43,6 +44,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   roleName: null,
+  roleLabel: null,
   loading: true,
   signOut: async () => {},
 });
@@ -59,7 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const user = data?.user ?? null;
   const profile = data?.profile ?? null;
-  const roleName = (profile?.roles as { name: string } | null)?.name ?? null;
+  const roleName = (profile?.roles as { name: string; label: string | null } | null)?.name ?? null;
+  const roleLabel = (profile?.roles as { name: string; label: string | null } | null)?.label ?? null;
   // Chỉ show loading khi chưa có data lần đầu (isPending). Refetch sau onAuthStateChange
   // không làm loading bật lại, tránh flash loading 2 lần.
   const loading = isPending;
@@ -82,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, roleName, loading, signOut }}
+      value={{ user, profile, roleName, roleLabel, loading, signOut }}
     >
       {children}
     </AuthContext.Provider>

@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Pencil } from "lucide-react";
+import { Plus, Search, Pencil, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
 import QuickEditModal from "@/components/employees/quick-edit-modal";
@@ -45,6 +45,9 @@ export default function EmployeesPage() {
   const [filterDept, setFilterDept] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  const [sortKey, setSortKey] = useState<"full_name" | "department" | "salary">("full_name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
   // Quick edit modal
   const [editId, setEditId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -67,18 +70,48 @@ export default function EmployeesPage() {
     setEditOpen(true);
   }
 
-  const filtered = employees.filter((emp) => {
-    const name = emp.full_name || emp.profiles?.full_name || "";
-    const code = emp.employee_code || "";
-    const matchSearch =
-      !search ||
-      name.toLowerCase().includes(search.toLowerCase()) ||
-      code.toLowerCase().includes(search.toLowerCase());
-    const matchDept =
-      filterDept === "all" || emp.employment_type === filterDept;
-    const matchStatus = filterStatus === "all" || emp.status === filterStatus;
-    return matchSearch && matchDept && matchStatus;
-  });
+  function toggleSort(key: typeof sortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  function SortIcon({ column }: { column: typeof sortKey }) {
+    if (sortKey !== column) return <ArrowUpDown className="ml-1 inline h-3.5 w-3.5 text-neutral-300" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="ml-1 inline h-3.5 w-3.5" />
+      : <ArrowDown className="ml-1 inline h-3.5 w-3.5" />;
+  }
+
+  const filtered = employees
+    .filter((emp) => {
+      const name = emp.full_name || emp.profiles?.full_name || "";
+      const code = emp.employee_code || "";
+      const matchSearch =
+        !search ||
+        name.toLowerCase().includes(search.toLowerCase()) ||
+        code.toLowerCase().includes(search.toLowerCase());
+      const matchDept =
+        filterDept === "all" || emp.employment_type === filterDept;
+      const matchStatus = filterStatus === "all" || emp.status === filterStatus;
+      return matchSearch && matchDept && matchStatus;
+    })
+    .sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      if (sortKey === "full_name") {
+        const na = a.full_name || a.profiles?.full_name || "";
+        const nb = b.full_name || b.profiles?.full_name || "";
+        return dir * na.localeCompare(nb, "vi");
+      }
+      if (sortKey === "department") {
+        return dir * (a.department ?? "").localeCompare(b.department ?? "", "vi");
+      }
+      // salary
+      return dir * ((a.salary_amount ?? 0) - (b.salary_amount ?? 0));
+    });
 
   return (
     <div className="space-y-6">
@@ -132,17 +165,22 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]"></TableHead>
-              <TableHead className="min-w-[120px]">Họ tên</TableHead>
-              <TableHead className="min-w-[100px]">Phòng ban</TableHead>
-              <TableHead className="text-right">Lương</TableHead>
+              <TableHead className="min-w-[180px] cursor-pointer select-none" onClick={() => toggleSort("full_name")}>
+                Họ tên <SortIcon column="full_name" />
+              </TableHead>
+              <TableHead className="min-w-[100px] cursor-pointer select-none" onClick={() => toggleSort("department")}>
+                Phòng ban <SortIcon column="department" />
+              </TableHead>
+              <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort("salary")}>
+                Lương <SortIcon column="salary" />
+              </TableHead>
               <TableHead className="w-[80px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-8">
+                <TableCell colSpan={4} className="py-8">
                   <div className="flex justify-center">
                     <LoadingBars message="Đang tải..." />
                   </div>
@@ -150,7 +188,7 @@ export default function EmployeesPage() {
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-neutral-400">
+                <TableCell colSpan={4} className="py-8 text-center text-neutral-400">
                   Không có nhân viên nào
                 </TableCell>
               </TableRow>
@@ -158,25 +196,25 @@ export default function EmployeesPage() {
               filtered.map((emp) => (
                 <TableRow key={emp.id}>
                   <TableCell>
-                    {emp.avatar_url ? (
-                      <img
-                        src={emp.avatar_url}
-                        alt=""
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-500">
-                        {(emp.full_name || "?")[0]}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
                     <button
                       type="button"
                       onClick={() => openEdit(emp.id)}
-                      className="font-medium text-left hover:underline cursor-pointer"
+                      className="flex items-center gap-3 text-left hover:underline cursor-pointer"
                     >
-                      {emp.full_name || emp.profiles?.full_name || "—"}
+                      {emp.avatar_url ? (
+                        <img
+                          src={emp.avatar_url}
+                          alt=""
+                          className="h-8 w-8 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 shrink-0 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-500">
+                          {(emp.full_name || "?")[0]}
+                        </div>
+                      )}
+                      <span className="font-medium">
+                        {emp.full_name || emp.profiles?.full_name || "—"}
+                      </span>
                     </button>
                   </TableCell>
                   <TableCell className="text-neutral-500">

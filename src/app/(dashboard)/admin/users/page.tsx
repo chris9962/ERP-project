@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import LoadingBars from "@/components/ui/loading-bars";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { HeaderActions } from "@/components/layout/header-actions";
 
 type Role = { id: string; name: string; label: string | null; description: string | null };
@@ -50,6 +50,8 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [sortKey, setSortKey] = useState<"full_name" | "email" | "role">("role");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   // Form state
   const [formEmail, setFormEmail] = useState("");
@@ -179,12 +181,49 @@ export default function AdminUsersPage() {
     fetchUsers();
   }
 
-  const filtered = users.filter(
-    (u) =>
-      !search ||
-      u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const ROLE_ORDER: Record<string, number> = {
+    admin: 0,
+    owner: 1,
+    manager: 2,
+    office_staff: 3,
+  };
+
+  function toggleSort(key: typeof sortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  function SortIcon({ column }: { column: typeof sortKey }) {
+    if (sortKey !== column) return <ArrowUpDown className="ml-1 inline h-3.5 w-3.5 text-neutral-300" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="ml-1 inline h-3.5 w-3.5" />
+      : <ArrowDown className="ml-1 inline h-3.5 w-3.5" />;
+  }
+
+  const filtered = users
+    .filter(
+      (u) =>
+        !search ||
+        u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email?.toLowerCase().includes(search.toLowerCase()),
+    )
+    .sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      if (sortKey === "full_name") {
+        return dir * (a.full_name ?? "").localeCompare(b.full_name ?? "", "vi");
+      }
+      if (sortKey === "email") {
+        return dir * (a.email ?? "").localeCompare(b.email ?? "");
+      }
+      // role
+      const ra = ROLE_ORDER[a.roles?.name ?? ""] ?? 99;
+      const rb = ROLE_ORDER[b.roles?.name ?? ""] ?? 99;
+      return dir * (ra - rb);
+    });
 
   return (
     <div className="space-y-6">
@@ -294,9 +333,15 @@ export default function AdminUsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[120px]">Họ tên</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead className="min-w-[120px] cursor-pointer select-none" onClick={() => toggleSort("full_name")}>
+                Họ tên <SortIcon column="full_name" />
+              </TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("email")}>
+                Email <SortIcon column="email" />
+              </TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("role")}>
+                Role <SortIcon column="role" />
+              </TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead className="w-[100px]" />
             </TableRow>

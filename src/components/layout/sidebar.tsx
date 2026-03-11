@@ -21,7 +21,7 @@ type SidebarProps = {
 export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { profile, roleName } = useAuth();
+  const { profile, roleName, roleLabel } = useAuth();
   const filteredNav = getSidebarPages(roleName);
 
   async function handleSignOut() {
@@ -153,7 +153,7 @@ export function Sidebar({ mobileOpen = false, onCloseAction }: SidebarProps) {
               <p className="text-sm font-medium text-neutral-900">
                 {profile?.full_name || "User"}
               </p>
-              <p className="text-xs text-neutral-500">{roleName || ""}</p>
+              <p className="text-xs text-neutral-500">{roleLabel || roleName || ""}</p>
             </div>
           )}
         </Link>
