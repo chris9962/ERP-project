@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { CalendarCheck } from "lucide-react";
+import { CalendarCheck, BarChart3, Banknote } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 
 function getTodayISO() {
   return new Date().toISOString().split("T")[0];
@@ -18,6 +19,11 @@ type AttendanceCounts = {
   notMarked: number;
 };
 
+type DailyStat = {
+  date: string;
+  marked: number;
+};
+
 export default function DashboardPage() {
   const { profile } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -29,6 +35,11 @@ export default function DashboardPage() {
     notMarked: 0,
   });
   const [totalEmployees, setTotalEmployees] = useState(0);
+  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
+  const [chartTotal, setChartTotal] = useState(0);
+  const [chartLoading, setChartLoading] = useState(true);
+  const [todaySalary, setTodaySalary] = useState(0);
+  const [salaryLoading, setSalaryLoading] = useState(true);
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
@@ -55,9 +66,32 @@ export default function DashboardPage() {
     setLoading(false);
   }, []);
 
+  const fetchDailyStats = useCallback(async () => {
+    setChartLoading(true);
+    const res = await fetch("/api/attendance/daily-stats", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      setDailyStats(data.stats ?? []);
+      setChartTotal(data.totalEmployees ?? 0);
+    }
+    setChartLoading(false);
+  }, []);
+
+  const fetchTodaySalary = useCallback(async () => {
+    setSalaryLoading(true);
+    const res = await fetch("/api/dashboard/today-salary", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      setTodaySalary(data.totalSalary ?? 0);
+    }
+    setSalaryLoading(false);
+  }, []);
+
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+    fetchDailyStats();
+    fetchTodaySalary();
+  }, [fetchStats, fetchDailyStats, fetchTodaySalary]);
 
   const lines = [
     { count: counts.fullDay, label: "người làm đủ ngày(1)" },
@@ -68,13 +102,13 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Link
           href={`/reports/attendance?from=${getTodayISO()}&to=${getTodayISO()}`}
           className="block transition-opacity hover:opacity-90"
         >
           <Card className="cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-start justify-between pb-2">
               <CardTitle className="text-sm font-medium text-neutral-500">Điểm danh hôm nay</CardTitle>
               <CalendarCheck className="h-4 w-4 text-neutral-400" />
             </CardHeader>
@@ -104,7 +138,63 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
+
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-neutral-500">Lương phải chi hôm nay</CardTitle>
+            <Banknote className="h-4 w-4 text-neutral-400" />
+          </CardHeader>
+          <CardContent>
+            {salaryLoading ? (
+              <div className="text-neutral-400">—</div>
+            ) : (
+              <div className="text-2xl font-bold text-primary">
+                {todaySalary.toLocaleString("vi-VN")}
+                <span className="ml-1 text-sm font-normal text-neutral-500">VND</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Bar chart: Điểm danh theo ngày */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-neutral-500">
+            Điểm danh tháng {new Date().getMonth() + 1}
+          </CardTitle>
+          <BarChart3 className="h-4 w-4 text-neutral-400" />
+        </CardHeader>
+        <CardContent>
+          {chartLoading ? (
+            <div className="flex h-[300px] items-center justify-center text-neutral-400">Đang tải...</div>
+          ) : dailyStats.length === 0 ? (
+            <div className="flex h-[300px] items-center justify-center text-neutral-400">Không có dữ liệu</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={dailyStats.map((d) => ({ ...d, label: formatDate(d.date) }))}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} domain={[0, chartTotal || "auto"]} />
+                <Tooltip
+                  labelFormatter={(label) => `Ngày ${label}`}
+                  formatter={(value) => [`${value}/${chartTotal}`, "Đã điểm danh"]}
+                />
+                <Bar dataKey="marked" radius={[3, 3, 0, 0]}>
+                  {dailyStats.map((d, i) => (
+                    <Cell key={i} fill={d.marked >= chartTotal ? "#22c55e" : d.marked > 0 ? "#3b82f6" : "#e5e7eb"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
+}
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr + "T00:00:00");
+  return `${d.getDate()}/${d.getMonth() + 1}`;
 }
