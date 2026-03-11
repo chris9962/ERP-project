@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,13 +43,22 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-neutral-50">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <div className="relative mx-auto mb-3 h-20 w-20 overflow-hidden rounded-xl bg-neutral-100">
+          <div
+            className={cn(
+              "relative mx-auto mb-3 overflow-hidden",
+              brand.showSidebarName && "rounded-xl bg-neutral-100",
+            )}
+            style={{
+              height: brand.showSidebarName ? 80 : 48,
+              width: brand.showSidebarName ? 80 : 160,
+            }}
+          >
             <Image
               src={brand.logo}
               alt={brand.name}
               fill
-              className="object-cover"
-              sizes="80px"
+              className="object-contain"
+              sizes={brand.showSidebarName ? "80px" : "160px"}
               priority
             />
           </div>
