@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
+import { getSalaryLabel } from "@/lib/utils";
 import { Pencil, User, FileDown } from "lucide-react";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
 import AvatarUpload from "@/components/employees/avatar-upload";
@@ -380,9 +381,7 @@ export default function EmployeeDetailPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>
-                    {employee.employment_type === "part_time"
-                      ? "Lương theo ca (VND)"
-                      : "Lương tháng (VND)"}
+                    {getSalaryLabel(employee.employment_type)}
                   </Label>
                   {editing ? (
                     <Input

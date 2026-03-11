@@ -339,7 +339,7 @@ export default function SalaryReportPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(r.salary_amount)}/{r.employment_type === "part_time" ? "Ca" : "Tháng"}
+                      {formatCurrency(r.salary_amount)}/{r.employment_type === "part_time" ? "Ngày" : "Tháng"}
                     </TableCell>
                     <TableCell className="text-right">
                       {r.total_days}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getSalaryLabel } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -186,9 +187,7 @@ export default function QuickEditModal({
             </div>
             <div className="space-y-2">
               <Label>
-                {formType === "part_time"
-                  ? "Lương theo ca (VND)"
-                  : "Lương tháng (VND)"}
+                {getSalaryLabel(formType)}
               </Label>
               <Input
                 type="number"

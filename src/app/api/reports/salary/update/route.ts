@@ -23,13 +23,13 @@ export async function POST(request: Request) {
     .eq("month", month)
     .eq("year", year)
     .single();
-
+  console.log(record);
   if (!record) return NextResponse.json({ error: "Record not found" }, { status: 404 });
 
   const baseSalary = Number(record.salary_amount) || 0;
   const totalDays = Number(record.total_days) || 0;
   const isPartTime = record.employment_type === "part_time";
-  const computedSalary = isPartTime ? baseSalary * (totalDays / 0.5) : baseSalary;
+  const computedSalary = isPartTime ? baseSalary * totalDays : baseSalary;
   const totalSalary = computedSalary;
 
   const { error } = await supabase

@@ -80,7 +80,7 @@ export async function GET(request: Request) {
     const salaryAmount = Number(emp.salary_amount) || 0;
     const isPartTime = emp.employment_type === "part_time";
     const totalSalary = isPartTime
-      ? salaryAmount * (totalDays / 0.5)
+      ? salaryAmount * totalDays
       : salaryAmount;
 
     rows.push({
