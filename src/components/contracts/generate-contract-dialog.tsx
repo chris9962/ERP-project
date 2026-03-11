@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileDown, Loader2 } from "lucide-react";
+import { Eye, FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 type ContractType = "labor" | "task";
@@ -147,6 +147,15 @@ export default function GenerateContractDialog({
   function handleContractTypeChange(v: string) {
     setContractType(v as ContractType);
     // Keep existing fields (don't reset) so company data persists
+  }
+
+  function handlePreview() {
+    const params = new URLSearchParams({
+      employeeId: employee.id,
+      contractType,
+      extraFields: JSON.stringify(extraFields),
+    });
+    window.open(`/contracts/preview?${params.toString()}`, "_blank");
   }
 
   async function handleGenerate() {
@@ -301,6 +310,10 @@ export default function GenerateContractDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Hủy
+          </Button>
+          <Button variant="outline" onClick={handlePreview} disabled={loadingData}>
+            <Eye className="h-4 w-4" />
+            <span className="ml-2">Xem trước</span>
           </Button>
           <Button onClick={handleGenerate} disabled={generating || loadingData}>
             {generating ? (

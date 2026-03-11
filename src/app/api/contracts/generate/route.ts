@@ -5,6 +5,7 @@ import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 
+
 const TEMPLATE_MAP: Record<string, string> = {
   labor: "hop-dong-lao-dong.docx",
   task: "hop-dong-khoan-viec.docx",
@@ -184,6 +185,7 @@ export async function POST(request: NextRequest) {
       type: "nodebuffer",
       compression: "DEFLATE",
     }) as Buffer;
+
     const uint8 = new Uint8Array(buf);
 
     const fileName =
