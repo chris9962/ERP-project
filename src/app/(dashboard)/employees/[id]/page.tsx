@@ -24,9 +24,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
-import { Pencil, User } from "lucide-react";
+import { Pencil, User, FileDown } from "lucide-react";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
 import AvatarUpload from "@/components/employees/avatar-upload";
+import GenerateContractDialog from "@/components/contracts/generate-contract-dialog";
 
 type Role = { id: string; name: string; label: string | null };
 type Employee = {
@@ -44,6 +45,7 @@ type Employee = {
   department: string | null;
   salary_amount: number | null;
   avatar_url: string | null;
+  contract_extra_data: Record<string, string> | null;
   profiles: { full_name: string | null; email: string | null; role_id: string | null; roles: { name: string; label: string | null } | null } | null;
 };
 type AttendanceRecord = {
@@ -77,6 +79,7 @@ export default function EmployeeDetailPage() {
   const [formSalary, setFormSalary] = useState("");
   const [formAvatarUrl, setFormAvatarUrl] = useState("");
   const [formRoleId, setFormRoleId] = useState("");
+  const [contractDialogOpen, setContractDialogOpen] = useState(false);
 
   const fetchFull = useCallback(async () => {
     const res = await fetch(`/api/employees/${id}/full`, { credentials: "include" });
@@ -183,10 +186,16 @@ export default function EmployeeDetailPage() {
       <HeaderBack href="/employees" />
       <HeaderActions>
         {!editing ? (
-          <Button size="sm" onClick={() => setEditing(true)}>
-            <Pencil className="h-4 w-4" />
-            <span className="hidden ml-2 md:block">Chỉnh sửa</span>
-          </Button>
+          <>
+            <Button size="sm" variant="outline" onClick={() => setContractDialogOpen(true)}>
+              <FileDown className="h-4 w-4" />
+              <span className="hidden ml-2 md:block">Xuất hợp đồng</span>
+            </Button>
+            <Button size="sm" onClick={() => setEditing(true)}>
+              <Pencil className="h-4 w-4" />
+              <span className="hidden ml-2 md:block">Chỉnh sửa</span>
+            </Button>
+          </>
         ) : (
           <>
             <Button size="sm" variant="outline" onClick={() => setEditing(false)}>
@@ -465,6 +474,23 @@ export default function EmployeeDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <GenerateContractDialog
+        open={contractDialogOpen}
+        onOpenChange={setContractDialogOpen}
+        employee={{
+          id: employee.id,
+          full_name: employee.full_name,
+          cccd_number: employee.cccd_number,
+          address: employee.address,
+          department: employee.department,
+          salary_amount: employee.salary_amount,
+          dob: employee.dob,
+          employment_type: employee.employment_type,
+          role_label: employee.profiles?.roles?.label || employee.profiles?.roles?.name || null,
+          contract_extra_data: employee.contract_extra_data,
+        }}
+      />
     </div>
   );
 }

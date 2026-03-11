@@ -8,6 +8,7 @@ import {
   DollarSign,
   UserCog,
   Shield,
+  Settings,
 } from "lucide-react";
 
 export const PAGE_IDS = {
@@ -19,6 +20,7 @@ export const PAGE_IDS = {
   REPORT_SALARY: "report-salary",
   ADMIN_USERS: "admin-users",
   ADMIN_ROLES: "admin-roles",
+  ADMIN_SETTINGS: "admin-settings",
 } as const;
 
 export type PageId = (typeof PAGE_IDS)[keyof typeof PAGE_IDS];
@@ -114,6 +116,16 @@ const PAGES: PageConfig[] = [
     icon: Shield,
     roles: ["admin"],
     description: "Quản lý vai trò hệ thống",
+    homeGroup: "he-thong",
+    showInSidebar: true,
+  },
+  {
+    id: PAGE_IDS.ADMIN_SETTINGS,
+    name: "Cài đặt",
+    href: "/admin/settings",
+    icon: Settings,
+    roles: ["admin"],
+    description: "Cài đặt hệ thống",
     homeGroup: "he-thong",
     showInSidebar: true,
   },
