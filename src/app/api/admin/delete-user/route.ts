@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -45,8 +46,9 @@ export async function POST(request: Request) {
   // Delete profile
   await supabase.from("profiles").delete().eq("id", userId);
 
-  // Delete auth user
-  await supabase.auth.admin.deleteUser(userId);
+  // Delete auth user (requires service role key)
+  const admin = createAdminClient();
+  await admin.auth.admin.deleteUser(userId);
 
   return NextResponse.json({ success: true });
 }
