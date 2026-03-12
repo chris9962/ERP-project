@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +25,15 @@ import {
 } from "@/components/ui/table";
 import LoadingBars from "@/components/ui/loading-bars";
 import { getSalaryLabel } from "@/lib/utils";
-import { Pencil, User, FileDown } from "lucide-react";
+import { Pencil, User, FileDown, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { HeaderActions, HeaderBack } from "@/components/layout/header-actions";
 import AvatarUpload from "@/components/employees/avatar-upload";
 import GenerateContractDialog from "@/components/contracts/generate-contract-dialog";
@@ -80,8 +88,12 @@ export default function EmployeeDetailPage() {
   const [formStatus, setFormStatus] = useState("");
   const [formSalary, setFormSalary] = useState("");
   const [formAvatarUrl, setFormAvatarUrl] = useState("");
+  const [formStartDate, setFormStartDate] = useState("");
   const [formRoleId, setFormRoleId] = useState("");
   const [contractDialogOpen, setContractDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const router = useRouter();
 
   const fetchFull = useCallback(async () => {
     const res = await fetch(`/api/employees/${id}/full`, { credentials: "include" });
@@ -104,6 +116,7 @@ export default function EmployeeDetailPage() {
       setFormStatus(emp.status);
       setFormSalary(String(emp.salary_amount || 0));
       setFormAvatarUrl(emp.avatar_url || "");
+      setFormStartDate(emp.start_date || "");
       setFormRoleId(emp.profiles?.role_id || "");
     }
     setRoles(data.roles ?? []);
@@ -133,6 +146,7 @@ export default function EmployeeDetailPage() {
         status: formStatus,
         salary_amount: formSalary,
         avatar_url: formAvatarUrl || null,
+        start_date: formStartDate || null,
         role_id: formRoleId || null,
       }),
       credentials: "include",
@@ -140,6 +154,21 @@ export default function EmployeeDetailPage() {
     setSaving(false);
     setEditing(false);
     if (res.ok) fetchFull();
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    const res = await fetch(`/api/employees/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    setDeleting(false);
+    if (res.ok) {
+      router.push("/employees");
+    } else {
+      const data = await res.json().catch(() => null);
+      alert(data?.error || "Xoá nhân viên thất bại");
+    }
   }
 
   function formatCurrency(value: number) {
@@ -197,6 +226,10 @@ export default function EmployeeDetailPage() {
             <Button size="sm" onClick={() => setEditing(true)}>
               <Pencil className="h-4 w-4" />
               <span className="hidden ml-2 md:block">Chỉnh sửa</span>
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
+              <Trash2 className="h-4 w-4" />
+              <span className="hidden ml-2 md:block">Xoá</span>
             </Button>
           </>
         ) : (
@@ -423,13 +456,21 @@ export default function EmployeeDetailPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Ngày vào làm</Label>
-                  <p className="text-sm">
-                    {employee.start_date
-                      ? new Date(employee.start_date).toLocaleDateString(
-                        "vi-VN",
-                      )
-                      : "—"}
-                  </p>
+                  {editing ? (
+                    <Input
+                      type="date"
+                      value={formStartDate}
+                      onChange={(e) => setFormStartDate(e.target.value)}
+                    />
+                  ) : (
+                    <p className="text-sm">
+                      {employee.start_date
+                        ? new Date(employee.start_date).toLocaleDateString(
+                          "vi-VN",
+                        )
+                        : "—"}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -486,6 +527,25 @@ export default function EmployeeDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xoá nhân viên</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xoá <strong>{employee.full_name}</strong>? Hành động này sẽ xoá toàn bộ dữ liệu điểm danh, ngày phép và tài khoản đăng nhập. Dữ liệu bảng lương đã chốt sẽ được giữ lại. Thao tác này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Đang xoá..." : "Xoá nhân viên"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <GenerateContractDialog
         open={contractDialogOpen}
