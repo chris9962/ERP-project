@@ -26,7 +26,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Download, DollarSign, Users, TrendingUp, Lock, Unlock, CheckCircle, Pencil, StickyNote } from "lucide-react";
+import { Download, DollarSign, Users, Lock, Unlock, CheckCircle, Pencil, StickyNote } from "lucide-react";
 import { useSort, SortableTableHead } from "@/components/ui/sortable-table-head";
 import LoadingBars from "@/components/ui/loading-bars";
 import { HeaderActions } from "@/components/layout/header-actions";
@@ -43,6 +43,10 @@ type SalaryRow = {
   bonus: number;
   total_salary: number;
   note: string;
+  absent_days: number;
+  paid_off_days: number;
+  leave_days_used: number;
+  unpaid_days: number;
 };
 
 export default function SalaryReportPage() {
@@ -94,7 +98,7 @@ export default function SalaryReportPage() {
   }
 
   function exportCSV() {
-    const headers = ["Họ tên", "Loại", "Lương cơ bản", "Ngày công", "Thưởng/Phạt", "Ghi chú", "Tổng lương"];
+    const headers = ["Họ tên", "Loại", "Lương cơ bản", "Ngày công", "Ngày vắng", "Nghỉ có lương", "Ngày phép", "Ngày trừ lương", "Thưởng/Phạt", "Ghi chú", "Tổng lương"];
     const csvRows = [
       headers.join(","),
       ...rows.map((r) =>
@@ -103,6 +107,10 @@ export default function SalaryReportPage() {
           r.employment_type === "part_time" ? "Bán thời gian" : "Toàn thời gian",
           r.salary_amount,
           r.total_days,
+          r.absent_days,
+          r.paid_off_days,
+          r.leave_days_used,
+          r.unpaid_days,
           r.bonus,
           `"${(r.note || "").replace(/"/g, '""')}"`,
           Math.round(r.total_salary + r.bonus),
@@ -213,10 +221,6 @@ export default function SalaryReportPage() {
 
   const totalPayroll = rows.reduce((sum, r) => sum + r.total_salary, 0);
   const totalBonus = rows.reduce((sum, r) => sum + r.bonus, 0);
-  const avgDays =
-    rows.length > 0
-      ? rows.reduce((sum, r) => sum + r.total_days, 0) / rows.length
-      : 0;
 
   const currentYear = now.getFullYear();
   const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
@@ -283,7 +287,7 @@ export default function SalaryReportPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">
@@ -308,11 +312,10 @@ export default function SalaryReportPage() {
             <div className="text-2xl font-bold">{rows.length}</div>
           </CardContent>
         </Card>
-
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-neutral-200 bg-white">
+      <div className="rounded-lg border border-neutral-200 bg-white overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -326,6 +329,10 @@ export default function SalaryReportPage() {
               <SortableTableHead column="total_days" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right">
                 Ngày công
               </SortableTableHead>
+              {/* <TableHead className="text-right">Vắng</TableHead>
+              <TableHead className="text-right">Nghỉ CL</TableHead>
+              <TableHead className="text-right">Phép</TableHead>
+              <TableHead className="text-right">Trừ lương</TableHead> */}
               <TableHead className="text-right">Thưởng/Phạt</TableHead>
               <SortableTableHead column="total_salary" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right">
                 Tổng lương
@@ -350,54 +357,72 @@ export default function SalaryReportPage() {
               </TableRow>
             ) : (
               <>
-                {sortedRows.map((r) => (
-                  <TableRow key={r.employee_id}>
-                    <TableCell className="font-medium">{r.full_name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {r.employment_type === "part_time" ? "Bán thời gian" : "Toàn thời gian"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(r.salary_amount)}/{r.employment_type === "part_time" ? "Ngày" : "Tháng"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {r.total_days}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <span className={r.bonus < 0 ? "text-red-600" : r.bonus > 0 ? "text-emerald-600" : ""}>
-                          {r.bonus ? formatCurrency(r.bonus) : "—"}
-                        </span>
-                        {r.note && (
-                          <TooltipProvider delayDuration={200}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <StickyNote className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-[240px]">
-                                <p className="text-xs">{r.note}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(r.total_salary + r.bonus)}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => openEditModal(r)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {sortedRows.map((r) => {
+                  return (
+                    <TableRow key={r.employee_id}>
+                      <TableCell className="font-medium">{r.full_name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {r.employment_type === "part_time" ? "Bán thời gian" : "Toàn thời gian"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(r.salary_amount)}/{r.employment_type === "part_time" ? "Ngày" : "Tháng"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {r.total_days}
+                      </TableCell>
+                      {/* <TableCell className="text-right">
+                        {isFullTime ? (
+                          <span className={r.absent_days > 0 ? "text-red-600" : ""}>{r.absent_days}</span>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {isFullTime ? r.paid_off_days : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {isFullTime ? r.leave_days_used : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {isFullTime ? (
+                          <span className={r.unpaid_days > 0 ? "text-red-600 font-medium" : ""}>{r.unpaid_days}</span>
+                        ) : "—"}
+                      </TableCell> */}
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <span className={r.bonus < 0 ? "text-red-600" : r.bonus > 0 ? "text-emerald-600" : ""}>
+                            {r.bonus ? formatCurrency(r.bonus) : "—"}
+                          </span>
+                          {r.note && (
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <StickyNote className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-[240px]">
+                                  <p className="text-xs">{r.note}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(r.total_salary + r.bonus)}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditModal(r)}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 <TableRow className="bg-neutral-50 font-medium">
                   <TableCell colSpan={3}>Tổng cộng</TableCell>
                   <TableCell className="text-right">

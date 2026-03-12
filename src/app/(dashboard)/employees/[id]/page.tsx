@@ -63,6 +63,7 @@ export default function EmployeeDetailPage() {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [leaveBalance, setLeaveBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -107,6 +108,7 @@ export default function EmployeeDetailPage() {
     }
     setRoles(data.roles ?? []);
     setAttendance(data.attendance ?? []);
+    setLeaveBalance(data.leaveBalance ?? 0);
     setLoading(false);
   }, [id]);
 
@@ -329,10 +331,10 @@ export default function EmployeeDetailPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {roles.map((r) => (
-                            <SelectItem key={r.id} value={r.id}>
-                              {r.label || r.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem key={r.id} value={r.id}>
+                            {r.label || r.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   ) : (
@@ -435,6 +437,17 @@ export default function EmployeeDetailPage() {
         </TabsContent>
 
         <TabsContent value="attendance" className="mt-4">
+
+          {employee.employment_type === "full_time" && (
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3">
+              <span className="text-sm text-neutral-500">Ngày phép năm còn lại:</span>
+              <span className={`text-lg font-bold ${leaveBalance <= 0 ? "text-red-500" : "text-emerald-600"}`}>
+                {leaveBalance}
+              </span>
+              <span className="text-sm text-neutral-400">ngày</span>
+            </div>
+          )}
+
           <Card>
             <CardContent className="pt-6">
               {attendance.length === 0 ? (

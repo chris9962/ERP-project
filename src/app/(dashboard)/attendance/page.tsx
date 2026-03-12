@@ -32,6 +32,7 @@ type Employee = {
   avatar_url: string | null;
   cccd_number?: string | null;
   department: string | null;
+  employment_type: string | null;
   profiles: { roles: { name: string } | null } | null;
   status: string;
 };
@@ -159,12 +160,24 @@ export default function AttendancePage() {
       return entry?.value == null;
     });
 
-  const valueOptions = [
+  const allValueOptions = [
     { value: 0.5, label: "Nửa ngày" },
     { value: 1, label: "Đủ ngày" },
     { value: 1.5, label: "Tăng ca" },
     { value: 0, label: "Vắng" },
   ];
+
+  // Full-time: only "Vắng" (0) — no attendance record means worked
+  const fullTimeValueOptions = [
+    { value: 0, label: "Vắng" },
+  ];
+
+  function getValueOptions(emp: Employee) {
+    return emp.employment_type === "full_time" ? fullTimeValueOptions : allValueOptions;
+  }
+
+  // For summary/header columns, use all options
+  const valueOptions = allValueOptions;
 
   function handleQrScanResult(data: { fullName: string; cccdNumber: string | null }) {
     setScannerOpen(false);
@@ -445,17 +458,25 @@ export default function AttendancePage() {
                     <TableCell className="text-neutral-500">
                       {emp.department || "—"}
                     </TableCell>
-                    {valueOptions.map((opt) => (
-                      <TableCell key={opt.value} className="text-center">
-                        <input
-                          type="radio"
-                          name={`attendance-table-${emp.id}`}
-                          checked={entry?.value != null && Number(entry.value) === opt.value}
-                          onChange={() => updateValue(emp.id, opt.value)}
-                          className="cursor-pointer"
-                        />
-                      </TableCell>
-                    ))}
+                    {allValueOptions.map((opt) => {
+                      const empOpts = getValueOptions(emp);
+                      const isAvailable = empOpts.some((o) => o.value === opt.value);
+                      return (
+                        <TableCell key={opt.value} className="text-center">
+                          {isAvailable ? (
+                            <input
+                              type="radio"
+                              name={`attendance-table-${emp.id}`}
+                              checked={entry?.value != null && Number(entry.value) === opt.value}
+                              onChange={() => updateValue(emp.id, opt.value)}
+                              className="cursor-pointer"
+                            />
+                          ) : (
+                            <span className="text-neutral-300">—</span>
+                          )}
+                        </TableCell>
+                      );
+                    })}
                     <TableCell>
                       <Input
                         value={entry?.note || defaultNote}
@@ -507,7 +528,7 @@ export default function AttendancePage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {valueOptions.map((opt) => (
+                  {getValueOptions(emp).map((opt) => (
                     <label
                       key={opt.value}
                       className="flex items-center gap-2 cursor-pointer text-sm"

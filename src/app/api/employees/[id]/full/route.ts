@@ -7,7 +7,8 @@ export async function GET(
 ) {
   const { id } = await params;
   const supabase = await createClient();
-  const [empRes, attRes, rolesRes] = await Promise.all([
+  const currentYear = new Date().getFullYear();
+  const [empRes, attRes, rolesRes, leaveRes] = await Promise.all([
     supabase
       .from("employees")
       .select("*, profiles(full_name, email, role_id, roles(name, label))")
@@ -20,6 +21,12 @@ export async function GET(
       .order("date", { ascending: false })
       .limit(30),
     supabase.from("roles").select("id, name, label").order("name"),
+    supabase
+      .from("employee_leave_balances")
+      .select("remaining_days")
+      .eq("employee_id", id)
+      .eq("year", currentYear)
+      .maybeSingle(),
   ]);
   if (empRes.error)
     return NextResponse.json({ error: empRes.error.message }, { status: 500 });
@@ -27,5 +34,6 @@ export async function GET(
     employee: empRes.data,
     attendance: attRes.data ?? [],
     roles: rolesRes.data ?? [],
+    leaveBalance: leaveRes.data ? Number(leaveRes.data.remaining_days) : null,
   });
 }

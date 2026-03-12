@@ -23,17 +23,28 @@ export async function GET() {
     (empRes.data ?? []).map((e) => [e.id, e]),
   );
 
+  // Build set of employees who have attendance today
+  const attendedSet = new Set((attRes.data ?? []).map((a) => a.employee_id));
+
   let totalSalary = 0;
-  for (const att of attRes.data ?? []) {
-    const emp = empMap.get(att.employee_id);
-    if (!emp || !emp.salary_amount) continue;
-    const value = Number(att.value);
-    if (emp.employment_type === "part_time") {
-      // Lương theo ngày * giá trị điểm danh
-      totalSalary += emp.salary_amount * value;
+  for (const emp of empRes.data ?? []) {
+    if (!emp.salary_amount) continue;
+    const dailyRate = emp.salary_amount / daysInMonth;
+
+    if (emp.employment_type === "full_time") {
+      // Full-time: if no attendance record OR value > 0 → worked today → earns daily rate
+      // If value === 0 → absent
+      const att = (attRes.data ?? []).find((a) => a.employee_id === emp.id);
+      if (!att || Number(att.value) !== 0) {
+        totalSalary += dailyRate;
+      }
+      // If absent (value=0), no salary added (will be handled by monthly calculation with paid off / leave)
     } else {
-      // Full-time: lương tháng / số ngày trong tháng * giá trị điểm danh
-      totalSalary += (emp.salary_amount / daysInMonth) * value;
+      // Part-time: salary per day * value
+      const att = (attRes.data ?? []).find((a) => a.employee_id === emp.id);
+      if (att) {
+        totalSalary += emp.salary_amount * Number(att.value);
+      }
     }
   }
 

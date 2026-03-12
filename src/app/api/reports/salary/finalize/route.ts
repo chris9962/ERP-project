@@ -21,6 +21,10 @@ export async function POST(request: Request) {
       bonus: number;
       total_salary: number;
       note: string;
+      absent_days: number;
+      paid_off_days: number;
+      leave_days_used: number;
+      unpaid_days: number;
     }>;
   };
 
@@ -30,7 +34,7 @@ export async function POST(request: Request) {
   const employeeIds = rows.map((r) => r.employee_id);
   const { data: employees } = await supabase
     .from("employees")
-    .select("id, cccd_number, profiles(roles(name))")
+    .select("id, cccd_number, employment_type, profiles(roles(name))")
     .in("id", employeeIds);
 
   const empMap = new Map(
@@ -54,6 +58,10 @@ export async function POST(request: Request) {
       bonus: r.bonus,
       total_salary: r.total_salary,
       note: r.note || null,
+      absent_days: r.absent_days || 0,
+      paid_off_days: r.paid_off_days || 0,
+      leave_days_used: r.leave_days_used || 0,
+      unpaid_days: r.unpaid_days || 0,
     };
   });
 
@@ -69,6 +77,38 @@ export async function POST(request: Request) {
     .insert(records);
 
   if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 });
+
+  // Update leave balances for full-time employees
+  const fullTimeRows = rows.filter((r) => {
+    const emp = empMap.get(r.employee_id);
+    return emp && (emp as { employment_type?: string }).employment_type === "full_time";
+  });
+
+  for (const row of fullTimeRows) {
+    // Get current balance
+    const { data: balance } = await supabase
+      .from("employee_leave_balances")
+      .select("remaining_days")
+      .eq("employee_id", row.employee_id)
+      .eq("year", year)
+      .single();
+
+    const previousRemaining = Number(balance?.remaining_days) || 0;
+    // +1 for this month's earned leave, -leave_days_used
+    const newRemaining = previousRemaining + 1 - (row.leave_days_used || 0);
+
+    await supabase
+      .from("employee_leave_balances")
+      .upsert(
+        {
+          employee_id: row.employee_id,
+          year,
+          remaining_days: Math.max(0, newRemaining),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "employee_id,year" },
+      );
+  }
 
   // Upsert salary_period
   const { error: periodErr } = await supabase
@@ -95,6 +135,37 @@ export async function DELETE(request: Request) {
   const { month, year } = body as { month: number; year: number };
 
   if (!month || !year) return NextResponse.json({ error: "month and year required" }, { status: 400 });
+
+  // Before deleting, reverse the leave balance changes
+  const { data: records } = await supabase
+    .from("salary_records")
+    .select("employee_id, employment_type, leave_days_used")
+    .eq("month", month)
+    .eq("year", year);
+
+  for (const rec of records ?? []) {
+    if (rec.employment_type !== "full_time") continue;
+
+    const { data: balance } = await supabase
+      .from("employee_leave_balances")
+      .select("remaining_days")
+      .eq("employee_id", rec.employee_id)
+      .eq("year", year)
+      .single();
+
+    if (balance) {
+      // Reverse: -1 (remove earned leave) + leave_days_used (restore used leave)
+      const restored = Number(balance.remaining_days) - 1 + (Number(rec.leave_days_used) || 0);
+      await supabase
+        .from("employee_leave_balances")
+        .update({
+          remaining_days: Math.max(0, restored),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("employee_id", rec.employee_id)
+        .eq("year", year);
+    }
+  }
 
   await supabase.from("salary_records").delete().eq("month", month).eq("year", year);
   await supabase.from("salary_periods").delete().eq("month", month).eq("year", year);
