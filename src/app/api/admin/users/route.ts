@@ -20,11 +20,22 @@ export async function GET() {
   if (pe) return NextResponse.json({ error: pe.message }, { status: 500 });
   if (!profiles?.length) return NextResponse.json(profiles ?? []);
 
+  // Check which profiles have linked employees
+  const profileIds = profiles.map((p) => p.id);
+  const { data: employees } = await supabase
+    .from("employees")
+    .select("id, profile_id")
+    .in("profile_id", profileIds);
+  const employeeMap = new Map(
+    (employees ?? []).map((e) => [e.profile_id, e.id]),
+  );
+
   const list = profiles.map((p) => ({
     ...p,
     roles: p.role_id
       ? { name: rolesMap.get(p.role_id)?.name ?? null, label: rolesMap.get(p.role_id)?.label ?? null }
       : null,
+    employee_id: employeeMap.get(p.id) ?? null,
   }));
   return NextResponse.json(list);
 }

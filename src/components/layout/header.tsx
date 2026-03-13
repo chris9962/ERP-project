@@ -15,7 +15,7 @@ export function Header({ onOpenMobileMenuAction }: HeaderProps) {
   const pageTitle = getPageTitleForPath(pathname ?? "");
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 sm:px-6">
+    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-neutral-200 bg-white pt-[env(safe-area-inset-top)] px-4 sm:px-6 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
         <Button
           type="button"

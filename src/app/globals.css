@@ -17,10 +17,10 @@
 }
 
 :root[data-brand="lienhung"] {
-  --primary: #2E7D32;
-  --primary-hover: #1B5E20;
+  --primary: #B8860B;
+  --primary-hover: #996F0A;
   --primary-foreground: #ffffff;
-  --primary-light: #E8F5E9;
+  --primary-light: #FDF5E6;
 }
 
 @theme inline {
@@ -42,6 +42,7 @@ body {
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 * {

@@ -278,13 +278,19 @@ export default function EmployeeDetailPage() {
                   </div>
                 </div>
               )}
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Mã nhân viên</Label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Mã nhân viên</Label>
                   <p className="text-sm font-mono">{employee.employee_code || "—"}</p>
                 </div>
-                <div className="space-y-2">
-                  <Label>Họ và tên</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Email</Label>
+                  <p className="text-sm">
+                    {employee.profiles?.email || "—"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Họ và tên</Label>
                   {editing ? (
                     <Input
                       value={formName}
@@ -294,8 +300,8 @@ export default function EmployeeDetailPage() {
                     <p className="text-sm">{employee.full_name || "—"}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Số CCCD</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Số CCCD</Label>
                   {editing ? (
                     <Input
                       value={formCccd}
@@ -305,8 +311,8 @@ export default function EmployeeDetailPage() {
                     <p className="text-sm">{employee.cccd_number || "—"}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Ngày sinh</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Ngày sinh</Label>
                   {editing ? (
                     <Input
                       type="date"
@@ -321,8 +327,8 @@ export default function EmployeeDetailPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Giới tính</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Giới tính</Label>
                   {editing ? (
                     <Select value={formGender} onValueChange={setFormGender}>
                       <SelectTrigger>
@@ -337,14 +343,8 @@ export default function EmployeeDetailPage() {
                     <p className="text-sm">{employee.gender || "—"}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <p className="text-sm">
-                    {employee.profiles?.email || "—"}
-                  </p>
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Địa chỉ</Label>
+                <div className="space-y-1 sm:col-span-2">
+                  <Label className="text-neutral-500">Địa chỉ</Label>
                   {editing ? (
                     <Input
                       value={formAddress}
@@ -355,8 +355,8 @@ export default function EmployeeDetailPage() {
                     <p className="text-sm">{employee.address || "—"}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Vai trò</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Vai trò</Label>
                   {editing ? (
                     <Select value={formRoleId} onValueChange={setFormRoleId}>
                       <SelectTrigger>
@@ -376,8 +376,8 @@ export default function EmployeeDetailPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Phòng ban</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Phòng ban</Label>
                   {editing ? (
                     <Input
                       value={formDept}
@@ -390,8 +390,8 @@ export default function EmployeeDetailPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Loại nhân viên</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Loại nhân viên</Label>
                   {editing ? (
                     <Select value={formType} onValueChange={setFormType}>
                       <SelectTrigger>
@@ -414,8 +414,8 @@ export default function EmployeeDetailPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">
                     {getSalaryLabel(employee.employment_type)}
                   </Label>
                   {editing ? (
@@ -432,8 +432,8 @@ export default function EmployeeDetailPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Trạng thái</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Trạng thái</Label>
                   {editing ? (
                     <Select value={formStatus} onValueChange={setFormStatus}>
                       <SelectTrigger>
@@ -448,14 +448,14 @@ export default function EmployeeDetailPage() {
                   ) : (
                     <Badge
                       variant="outline"
-                      className={statusColors[employee.status] || ""}
+                      className={`mt-1 ${statusColors[employee.status] || ""}`}
                     >
                       {statusLabels[employee.status] || employee.status}
                     </Badge>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Ngày vào làm</Label>
+                <div className="space-y-1">
+                  <Label className="text-neutral-500">Ngày vào làm</Label>
                   {editing ? (
                     <Input
                       type="date"

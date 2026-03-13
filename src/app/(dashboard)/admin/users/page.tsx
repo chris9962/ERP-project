@@ -28,7 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import LoadingBars from "@/components/ui/loading-bars";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, UserPlus, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useSort, SortableTableHead } from "@/components/ui/sortable-table-head";
 import { HeaderActions } from "@/components/layout/header-actions";
 
@@ -42,15 +44,18 @@ type UserProfile = {
   role_id: string | null;
   roles: { name: string; label: string | null } | null;
   created_at: string;
+  employee_id: string | null;
 };
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [creatingEmployee, setCreatingEmployee] = useState(false);
   const { sortKey, sortDir, toggleSort } = useSort<"full_name" | "email" | "role">("role");
 
   // Form state
@@ -170,6 +175,37 @@ export default function AdminUsersPage() {
     fetchUsers();
   }
 
+  async function createEmployeeForUser(user: UserProfile) {
+    setCreatingEmployee(true);
+    try {
+      const res = await fetch("/api/employees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile_id: user.id,
+          full_name: user.full_name || "",
+          employment_type: "full_time",
+          status: "active",
+          start_date: new Date().toISOString().split("T")[0],
+          salary_amount: 0,
+        }),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error("Lỗi khi tạo nhân viên: " + (data.error ?? res.statusText));
+        return;
+      }
+      const employee = await res.json();
+      toast.success("Đã tạo nhân viên thành công");
+      setDialogOpen(false);
+      fetchUsers();
+      router.push(`/employees/${employee.id}`);
+    } finally {
+      setCreatingEmployee(false);
+    }
+  }
+
   async function deleteUser(user: UserProfile) {
     if (!confirm(`Xóa user "${user.full_name || user.email}"?`)) return;
 
@@ -279,6 +315,38 @@ export default function AdminUsersPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {editingUser && (
+                <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
+                  <Label className="text-xs text-neutral-500">Nhân viên liên kết</Label>
+                  {editingUser.employee_id ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full"
+                      onClick={() => {
+                        setDialogOpen(false);
+                        router.push(`/employees/${editingUser.employee_id}`);
+                      }}
+                    >
+                      <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                      Xem nhân viên
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full"
+                      disabled={creatingEmployee}
+                      onClick={() => createEmployeeForUser(editingUser)}
+                    >
+                      <UserPlus className="mr-2 h-3.5 w-3.5" />
+                      {creatingEmployee ? "Đang tạo..." : "Tạo nhân viên cho user này"}
+                    </Button>
+                  )}
+                </div>
+              )}
               {formError && (
                 <p className="text-sm text-red-500">{formError}</p>
               )}
