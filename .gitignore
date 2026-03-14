@@ -36,7 +36,8 @@ yarn-error.log*
 .env.*.local
 .env.legi
 .env.lienhung
-
+.env.legi.prod
+.env.lienhung.prod
 # claude mcp config (contains secrets)
 .claude/mcp.json
 
