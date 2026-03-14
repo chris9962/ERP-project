@@ -207,13 +207,20 @@ export default function AdminUsersPage() {
   }
 
   async function deleteUser(user: UserProfile) {
-    if (!confirm(`Xóa user "${user.full_name || user.email}"?`)) return;
+    if (!confirm(`Xóa user "${user.full_name || user.email}"? Hành động này không thể hoàn tác.`)) return;
 
-    await fetch("/api/admin/delete-user", {
+    const res = await fetch("/api/admin/delete-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: user.id }),
+      credentials: "include",
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(data.error ?? "Không thể xóa user");
+      return;
+    }
+    toast.success("Đã xóa user");
     fetchUsers();
   }
 
