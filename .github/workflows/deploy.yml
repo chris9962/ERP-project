@@ -1,0 +1,70 @@
+name: Deploy + Migrate
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: "Deploy ${{ matrix.name }}"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # - name: "Legi"
+          #   project_name: lego-food
+          #   vercel_token: VERCEL_TOKEN_LEGI
+          #   vercel_org: VERCEL_ORG_ID_LEGI
+          #   supabase_url: SUPABASE_URL_LEGI
+          #   supabase_access_token: SUPABASE_ACCESS_TOKEN_LEGI
+          #   supabase_db_password: SUPABASE_DB_PASSWORD_LEGI
+
+          - name: "Lienhung"
+            project_name: lienhung-food
+            vercel_token: VERCEL_TOKEN_LIENHUNG
+            vercel_org: VERCEL_ORG_ID_LIENHUNG
+            supabase_url: SUPABASE_URL_LIENHUNG
+            supabase_access_token: SUPABASE_ACCESS_TOKEN_LIENHUNG
+            supabase_db_password: SUPABASE_DB_PASSWORD_LIENHUNG
+
+          # Them client moi: copy block nhu tren va them secrets tuong ung
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      # --- Migrate DB ---
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project
+        run: supabase link --project-ref $(echo "$SUPABASE_URL" | sed 's|https://||;s|\.supabase\.co||')
+        env:
+          SUPABASE_URL: ${{ secrets[matrix.supabase_url] }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets[matrix.supabase_access_token] }}
+
+      - name: Push migrations
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets[matrix.supabase_access_token] }}
+          SUPABASE_DB_PASSWORD: ${{ secrets[matrix.supabase_db_password] }}
+
+      # --- Deploy to Vercel ---
+      - name: Deploy to Vercel
+        run: |
+          npm i -g vercel
+          vercel link --yes --project=$PROJECT_NAME --token=$TOKEN
+          vercel pull --yes --environment=production --token=$TOKEN
+          vercel build --prod --token=$TOKEN
+          vercel deploy --prebuilt --prod --token=$TOKEN
+        env:
+          TOKEN: ${{ secrets[matrix.vercel_token] }}
+          VERCEL_ORG_ID: ${{ secrets[matrix.vercel_org] }}
+          PROJECT_NAME: ${{ matrix.project_name }}
