@@ -13,9 +13,8 @@ jobs:
       matrix:
         include:
           # - name: "Legi"
-          #   project_name: lego-food
+          #   project_name: legi-food
           #   vercel_token: VERCEL_TOKEN_LEGI
-          #   vercel_org: VERCEL_ORG_ID_LEGI
           #   supabase_url: SUPABASE_URL_LEGI
           #   supabase_access_token: SUPABASE_ACCESS_TOKEN_LEGI
           #   supabase_db_password: SUPABASE_DB_PASSWORD_LEGI
@@ -23,7 +22,6 @@ jobs:
           - name: "Lienhung"
             project_name: lienhung-food
             vercel_token: VERCEL_TOKEN_LIENHUNG
-            vercel_org: VERCEL_ORG_ID_LIENHUNG
             supabase_url: SUPABASE_URL_LIENHUNG
             supabase_access_token: SUPABASE_ACCESS_TOKEN_LIENHUNG
             supabase_db_password: SUPABASE_DB_PASSWORD_LIENHUNG
@@ -58,14 +56,16 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets[matrix.supabase_db_password] }}
 
       # --- Deploy to Vercel ---
-      - name: Deploy to Vercel
+      - name: Install Vercel CLI
+        run: npm i -g vercel
+
+      - name: Link Vercel project
+        run: vercel link --yes --project=${{ matrix.project_name }} --token=${{ secrets[matrix.vercel_token] }}
+
+      - name: Pull, Build & Deploy
         run: |
-          npm i -g vercel
-          vercel link --yes --project=$PROJECT_NAME --token=$TOKEN
           vercel pull --yes --environment=production --token=$TOKEN
           vercel build --prod --token=$TOKEN
           vercel deploy --prebuilt --prod --token=$TOKEN
         env:
           TOKEN: ${{ secrets[matrix.vercel_token] }}
-          VERCEL_ORG_ID: ${{ secrets[matrix.vercel_org] }}
-          PROJECT_NAME: ${{ matrix.project_name }}
